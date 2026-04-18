@@ -483,6 +483,30 @@ input,textarea,select{font-family:inherit}
 .doc-tile:hover .doc-del{display:flex}
 /* spin keyframe */
 @keyframes spin{to{transform:rotate(360deg)}}
+/* ════ Responsive Design ════ */
+@media (max-width: 768px) {
+  .mob-only { display: flex !important; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; z-index: 9999; position: fixed; width: 280px; max-width: 85vw; }
+  .sidebar.show { transform: translateX(0); }
+  .dm { margin-left: 0; padding-top: 52px; }
+  .dtbar { position: fixed; width: 100%; top: 0; padding: 0 14px; background: var(--sf); border-bottom: 1px solid var(--br); z-index: 50; }
+  .dc { padding: 15px; }
+  .sb-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; backdrop-filter: blur(2px); }
+  .sb-over.show { display: block; }
+  .g2, .g3, .g7030, .doc-grid, .req-grid, .skill-grid, .sop-split, .kanban, .plans-grid, .int-mode-grid { grid-template-columns: 1fr; }
+  .modal { width: 95% !important; margin: 10px; max-height: 90vh; }
+  .modal-body { padding: 15px; }
+  .onboard-content { width: 100%; padding: 20px; }
+  .hero h1 { font-size: 32px; }
+  .steps { flex-direction: column; align-items: flex-start; gap: 8px; }
+  .mc-card { padding: 15px; }
+  .stat-row { flex-direction: column; }
+  .ai-eval-hdr { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .ai-score { margin-left: 0; }
+  #pv-port .card.cp { padding: 15px; }
+  .repo-card { padding: 12px; }
+}
+.mob-only { display: none; }
 </style>
 </head>
 <body>
@@ -891,9 +915,13 @@ input,textarea,select{font-family:inherit}
 
   <!-- MAIN CONTENT -->
   <div class="dm">
+    <div id="sb-over" class="sb-over" onclick="toggleSidebar()"></div>
     <!-- Topbar -->
     <header class="dtbar">
-      <div id="dtitle" class="dtitle">Dashboard</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="icon-btn mob-only" onclick="toggleSidebar()" style="margin-right:4px"><i data-lucide="menu" width="18" height="18"></i></button>
+        <div id="dtitle" class="dtitle">Dashboard</div>
+      </div>
       <div class="dtr">
         <div class="stat-pill"><span class="pulse"></span> AI Online</div>
         <div class="icon-btn" id="notif-btn" onclick="toggleNotif()">
@@ -1553,7 +1581,18 @@ function updateBackBtn(){
   const btn=document.getElementById('back-btn');
   if(btn) btn.classList.toggle('visible', S.history.length>0 && S.screen!=='dashboard');
 }
+function toggleSidebar(){
+  const sb=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sb-over');
+  if(!sb||!overlay)return;
+  sb.classList.toggle('show');
+  overlay.classList.toggle('show');
+}
 function showPanel(name, navEl, addToHistory=true){
+  const sb=document.querySelector('.sidebar');
+  const overlay=document.getElementById('sb-over');
+  if(sb&&sb.classList.contains('show')){ sb.classList.remove('show'); overlay.classList.remove('show'); }
+
   if(addToHistory && S.panel!==name) S.history.push({type:'panel',val:S.panel});
   const panelIds=['overview','docs','tracker','eval','port','sop','grants','int','plans','profile'];
   panelIds.forEach(p=>{ const el=document.getElementById('pv-'+p); if(el)el.classList.remove('ac'); });
