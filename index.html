@@ -1,0 +1,2077 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>PathWay - AI Admissions Advisor</title>
+<meta name="description" content="PathWay: AI-driven international university admissions advisor for European students."/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet"/>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+<style>
+/* ── TOKENS ── */
+:root {
+  --r-xs:6px;--r-sm:8px;--r-md:12px;--r-lg:16px;--r-xl:20px;--r-pill:999px;
+  --font:'Inter',sans-serif;--tr:170ms cubic-bezier(.4,0,.2,1);--sw:230px;
+  --accent:#6366f1;--ah:#4f46e5;--as:rgba(99,102,241,.12);--ab:rgba(99,102,241,.28);
+  --green:#22c55e;--gs:rgba(34,197,94,.11);--gb:rgba(34,197,94,.25);
+  --amber:#f59e0b;--ams:rgba(245,158,11,.11);--amb:rgba(245,158,11,.25);
+  --red:#ef4444;--rs:rgba(239,68,68,.11);--rb:rgba(239,68,68,.25);
+}
+[data-theme="dark"]{
+  --bg:#0d0f14;--sf:#13161e;--sf2:#1a1e29;--sf3:#222637;
+  --br:rgba(255,255,255,.07);--br2:rgba(255,255,255,.12);
+  --t1:#f0f2f8;--t2:#8b90a7;--t3:#555a74;
+  --sh:0 1px 3px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.04);
+  --shl:0 8px 32px rgba(0,0,0,.5);
+}
+[data-theme="light"]{
+  --bg:#f4f5f9;--sf:#ffffff;--sf2:#f8f9fc;--sf3:#eef0f6;
+  --br:rgba(0,0,0,.07);--br2:rgba(0,0,0,.13);
+  --t1:#0f1117;--t2:#5a5f7a;--t3:#a0a5be;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 0 0 1px rgba(0,0,0,.04);
+  --shl:0 8px 32px rgba(0,0,0,.12);
+}
+/* ── BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px;-webkit-font-smoothing:antialiased}
+body{font-family:var(--font);background:var(--bg);color:var(--t1);min-height:100vh;transition:background var(--tr),color var(--tr)}
+button{cursor:pointer;border:none;background:none;font-family:inherit;color:inherit}
+input,textarea,select{font-family:inherit}
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-thumb{background:var(--br2);border-radius:99px}
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:flex}
+/* ── FLOAT NAV ── */
+.fnav{position:fixed;top:0;left:0;right:0;z-index:300;display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:54px;background:var(--sf);border-bottom:1px solid var(--br);backdrop-filter:blur(12px)}
+.nlogo{display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo-sq{width:27px;height:27px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.nlogo-text{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.nright{display:flex;align-items:center;gap:10px}
+.back-btn{display:none;align-items:center;gap:5px;font-size:13px;font-weight:500;color:var(--t2);padding:6px 10px;border-radius:var(--r-sm);border:1px solid var(--br);background:var(--sf);transition:all var(--tr);cursor:pointer}
+.back-btn:hover{color:var(--t1);border-color:var(--br2)}
+.back-btn.visible{display:flex}
+.ttoggle{display:flex;background:var(--sf3);border:1px solid var(--br);border-radius:var(--r-pill);padding:3px}
+.tbtn{width:27px;height:27px;border-radius:var(--r-pill);display:flex;align-items:center;justify-content:center;color:var(--t3);transition:all var(--tr)}
+.tbtn.active{background:var(--sf);color:var(--t1);box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.nlink{font-size:13px;font-weight:500;color:var(--t2);padding:6px 10px;border-radius:var(--r-sm);cursor:pointer;transition:all var(--tr)}
+.nlink:hover{color:var(--t1);background:var(--sf3)}
+/* ── TOAST ── */
+#toast-wrap{position:fixed;bottom:20px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r-md);font-size:13px;font-weight:500;min-width:240px;box-shadow:var(--shl);animation:toast-in .25s ease forwards;pointer-events:auto;border:1px solid}
+.toast-success{background:var(--sf);color:var(--green);border-color:var(--gb)}
+.toast-error{background:var(--sf);color:var(--red);border-color:var(--rb)}
+.toast-info{background:var(--sf);color:var(--t1);border-color:var(--br2)}
+.toast-warning{background:var(--sf);color:var(--amber);border-color:var(--amb)}
+@keyframes toast-in{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:none}}
+/* ── NOTIF DROPDOWN ── */
+.notif-drop{display:none;position:absolute;top:44px;right:0;width:300px;background:var(--sf);border:1px solid var(--br2);border-radius:var(--r-lg);box-shadow:var(--shl);z-index:400;overflow:hidden}
+.notif-drop.open{display:block;animation:fd .2s ease}
+@keyframes fd{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.notif-head{padding:12px 14px;border-bottom:1px solid var(--br);display:flex;justify-content:space-between;align-items:center}
+.notif-title{font-size:13px;font-weight:600}
+.notif-item{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid var(--br);cursor:pointer;transition:background var(--tr)}
+.notif-item:hover{background:var(--sf2)}
+.notif-item:last-child{border-bottom:none}
+.ndot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.ndot-red{background:var(--red)}
+.ndot-amber{background:var(--amber)}
+.ndot-green{background:var(--green)}
+.ntext{font-size:12.5px;color:var(--t1);line-height:1.4}
+.ndate{font-size:11px;color:var(--t3);margin-top:2px}
+/* ── MODAL ── */
+.mbk{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.55);backdrop-filter:blur(6px);align-items:center;justify-content:center}
+.mbk.open{display:flex}
+.modal{background:var(--sf);border:1px solid var(--br2);border-radius:var(--r-xl);padding:24px;width:500px;max-width:92vw;box-shadow:var(--shl);animation:fd .25s ease;max-height:90vh;overflow-y:auto}
+.modal-hd{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.modal-title{font-size:15px;font-weight:700;color:var(--t1)}
+.modal-body{font-size:13px;line-height:1.7;color:var(--t2)}
+.modal-ft{display:flex;justify-content:flex-end;gap:8px;margin-top:16px}
+/* ── BUTTONS ── */
+.btn-p{display:inline-flex;align-items:center;gap:7px;background:var(--accent);color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:var(--r-md);transition:all var(--tr);letter-spacing:-.1px}
+.btn-p:hover{background:var(--ah);transform:translateY(-1px);box-shadow:0 4px 14px rgba(99,102,241,.35)}
+.btn-p:active{transform:none}
+.btn-g{display:inline-flex;align-items:center;gap:6px;color:var(--t2);font-size:13px;font-weight:500;padding:8px 13px;border-radius:var(--r-sm);border:1px solid var(--br);background:var(--sf);transition:all var(--tr)}
+.btn-g:hover{color:var(--t1);border-color:var(--br2)}
+.btn-sm{font-size:12px;font-weight:600;padding:7px 13px;border-radius:var(--r-sm);transition:all var(--tr);display:inline-flex;align-items:center;gap:5px}
+.btn-acc{background:var(--accent);color:#fff}.btn-acc:hover{background:var(--ah)}
+.btn-out{background:var(--sf3);color:var(--t2);border:1px solid var(--br)}.btn-out:hover{color:var(--t1);border-color:var(--br2)}
+.btn-grn{background:var(--gs);color:var(--green);border:1px solid var(--gb)}.btn-grn:hover{background:var(--green);color:#fff}
+.btn-red{background:var(--rs);color:var(--red);border:1px solid var(--rb)}.btn-red:hover{background:var(--red);color:#fff}
+.w-full{width:100%}
+/* ── PILLS ── */
+.sp{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;border-radius:var(--r-pill);padding:3px 9px;white-space:nowrap;border:1px solid}
+.sp-g{background:var(--gs);color:var(--green);border-color:var(--gb)}
+.sp-a{background:var(--ams);color:var(--amber);border-color:var(--amb)}
+.sp-ac{background:var(--as);color:var(--accent);border-color:var(--ab)}
+.sp-r{background:var(--rs);color:var(--red);border-color:var(--rb)}
+.sp-gr{background:var(--sf3);color:var(--t2);border-color:var(--br)}
+/* ── AI LABEL ── */
+.ai-lbl{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--accent);background:var(--as);border:1px solid var(--ab);border-radius:var(--r-xs);padding:2px 7px}
+/* ── PROGRESS BARS ── */
+.pb-bg{background:var(--sf3);border-radius:99px;height:4px}
+.pb{height:4px;border-radius:99px;transition:width .5s ease}
+.pb-g{background:linear-gradient(90deg,#16a34a,var(--green))}
+.pb-a{background:linear-gradient(90deg,#d97706,var(--amber))}
+.pb-ac{background:linear-gradient(90deg,var(--ah),var(--accent))}
+/* ── DIVIDER ── */
+.div{height:1px;background:var(--br);margin:12px 0}
+/* ── CARD ── */
+.card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r-lg);box-shadow:var(--sh)}
+.cp{padding:18px 20px}
+.ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ct{font-size:14px;font-weight:600;color:var(--t1)}
+.ct-row{display:flex;align-items:center;gap:7px}
+/* ── GRIDS ── */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.g7030{display:grid;grid-template-columns:1.7fr 1fr;gap:16px}
+.gst{display:flex;flex-direction:column;gap:16px}
+
+/* ══════════════════════════════
+   STATE 1: ONBOARDING
+══════════════════════════════ */
+#sc-onboard{flex-direction:column;align-items:center;justify-content:center;padding:100px 24px 48px}
+.obwrap{width:100%;max-width:580px}
+.step-dots{display:flex;gap:6px;margin-bottom:44px}
+.sdot{width:6px;height:6px;border-radius:50%;background:var(--br2);transition:all .3s}
+.sdot.done{background:var(--accent)}
+.sdot.here{width:20px;background:var(--accent);border-radius:3px}
+.ob-q{font-size:27px;font-weight:700;letter-spacing:-.5px;line-height:1.3;margin-bottom:7px}
+.ob-sub{font-size:14px;color:var(--t2);margin-bottom:28px}
+.tag-grid{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:32px}
+.tag-chip{padding:8px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:500;border:1.5px solid var(--br2);color:var(--t2);background:var(--sf);cursor:pointer;transition:all var(--tr);user-select:none}
+.tag-chip:hover{border-color:var(--accent);color:var(--accent)}
+.tag-chip.sel{background:var(--as);border-color:var(--accent);color:var(--accent);font-weight:600}
+.radio-grp{display:flex;flex-direction:column;gap:10px;margin-bottom:32px}
+.r-opt{display:flex;align-items:center;gap:14px;padding:13px 17px;border-radius:var(--r-md);border:1.5px solid var(--br2);cursor:pointer;transition:all var(--tr);background:var(--sf)}
+.r-opt:hover{border-color:var(--accent)}
+.r-opt.sel{border-color:var(--accent);background:var(--as)}
+.rcircle{width:18px;height:18px;border-radius:50%;border:2px solid var(--br2);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all var(--tr)}
+.r-opt.sel .rcircle{border-color:var(--accent);background:var(--accent)}
+.r-opt.sel .rcircle::after{content:'';width:6px;height:6px;border-radius:50%;background:#fff}
+.rlabel{font-size:14px;font-weight:500}
+.rsub{font-size:12px;color:var(--t2);margin-top:2px}
+.ob-ft{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.step-txt{font-size:12px;color:var(--t3)}
+.fad{animation:fadu .3s ease both}
+@keyframes fadu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ══════════════════════════════
+   STATE 2: MATCHES
+══════════════════════════════ */
+#sc-matches{flex-direction:column;padding-top:54px}
+.mc-wrap{max-width:820px;margin:0 auto;width:100%;padding:40px 24px}
+.mc-h{font-size:22px;font-weight:700;letter-spacing:-.4px;margin-bottom:5px}
+.mc-sub{font-size:13px;color:var(--t2);margin-bottom:8px}
+.mtags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:20px}
+.mtag{font-size:11px;font-weight:600;background:var(--as);border:1px solid var(--ab);color:var(--accent);border-radius:var(--r-pill);padding:3px 10px}
+/* Search + filter row */
+.sf-row{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.search-box{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--sf);border:1px solid var(--br2);border-radius:var(--r-sm);padding:8px 12px}
+.search-box input{border:none;outline:none;background:none;color:var(--t1);font-size:13px;width:100%}
+.search-box input::placeholder{color:var(--t3)}
+.flt-btn{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--t2);padding:8px 12px;border-radius:var(--r-sm);border:1px solid var(--br);background:var(--sf);cursor:pointer;transition:all var(--tr)}
+.flt-btn.active{color:var(--accent);border-color:var(--ab);background:var(--as)}
+.flt-btn:hover{color:var(--t1)}
+/* Match card */
+.mc-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r-lg);margin-bottom:10px;box-shadow:var(--sh);overflow:hidden;transition:border-color var(--tr),box-shadow var(--tr)}
+.mc-card:hover{border-color:var(--br2);box-shadow:var(--shl)}
+.mc-card.hidden{display:none}
+.mc-hd{display:flex;align-items:center;justify-content:space-between;padding:16px 18px;cursor:pointer}
+.mc-left{display:flex;align-items:center;gap:13px}
+.sbadge{width:38px;height:38px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0}
+.b-eth{background:#dbeafe;color:#1d4ed8}
+.b-tum{background:#fee2e2;color:#b91c1c}
+.b-kth{background:#d1fae5;color:#065f46}
+.b-epl{background:#ede9fe;color:#6d28d9}
+.b-imp{background:#fef3c7;color:#92400e}
+.b-del{background:#e0f2fe;color:#0369a1}
+.b-uva{background:#f3e8ff;color:#6b21a8}
+.b-aal{background:#fce7f3;color:#9d174d}
+.b-rw{background:#f0fdf4;color:#14532d}
+.b-edi{background:#fff7ed;color:#9a3412}
+.b-ucl{background:#f8fafc;color:#1e293b}
+.b-cph{background:#f5f3ff;color:#4c1d95}
+[data-theme="dark"] .b-eth{background:rgba(59,130,246,.15);color:#93c5fd}
+[data-theme="dark"] .b-tum{background:rgba(239,68,68,.12);color:#fca5a5}
+[data-theme="dark"] .b-kth{background:rgba(34,197,94,.12);color:#86efac}
+[data-theme="dark"] .b-epl{background:rgba(168,85,247,.12);color:#d8b4fe}
+[data-theme="dark"] .b-imp{background:rgba(245,158,11,.12);color:#fcd34d}
+[data-theme="dark"] .b-del{background:rgba(14,165,233,.12);color:#7dd3fc}
+[data-theme="dark"] .b-uva{background:rgba(147,51,234,.12);color:#c084fc}
+[data-theme="dark"] .b-aal{background:rgba(236,72,153,.12);color:#f9a8d4}
+[data-theme="dark"] .b-rw{background:rgba(34,197,94,.08);color:#86efac}
+[data-theme="dark"] .b-edi{background:rgba(249,115,22,.12);color:#fdba74}
+[data-theme="dark"] .b-ucl{background:rgba(148,163,184,.1);color:#cbd5e1}
+[data-theme="dark"] .b-cph{background:rgba(139,92,246,.12);color:#c4b5fd}
+.mc-sname{font-size:14px;font-weight:600;color:var(--t1)}
+.mc-prog{font-size:12px;color:var(--t2);margin-top:2px}
+.mc-right{display:flex;align-items:center;gap:10px}
+.exp-ic{color:var(--t3);transition:transform var(--tr)}
+.mc-card.open .exp-ic{transform:rotate(180deg)}
+.mc-body{display:none;padding:0 18px 16px;border-top:1px solid var(--br);padding-top:14px}
+.mc-card.open .mc-body{display:block;animation:fadu .2s ease}
+.req-list{display:flex;flex-direction:column;gap:7px;margin-bottom:13px}
+.req-item{display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:var(--r-sm);background:var(--sf2);font-size:13px}
+.req-label{flex:1;font-weight:500;color:var(--t1)}
+.req-val{color:var(--t2);font-size:12px}
+.st-ok{color:var(--green)}.st-warn{color:var(--amber)}.st-miss{color:var(--red)}
+.card-acts{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+/* Uni website link */
+.uni-link{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--accent);text-decoration:none;transition:opacity var(--tr)}
+.uni-link:hover{opacity:.75;text-decoration:underline}
+.results-count{font-size:12px;color:var(--t3);margin-bottom:12px}
+
+/* ══════════════════════════════
+   STATE 3+4: DASHBOARD
+══════════════════════════════ */
+#sc-dash{flex-direction:row}
+.sidebar{width:var(--sw);min-width:var(--sw);background:var(--sf);border-right:1px solid var(--br);display:flex;flex-direction:column;height:100vh;position:fixed;left:0;top:0;z-index:100}
+.sb-top{padding:15px 14px;border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between}
+.sb-logo{display:flex;align-items:center;gap:8px}
+.sb-ltext{font-size:15px;font-weight:700;letter-spacing:-.2px}
+.sb-user{padding:11px 13px;border-bottom:1px solid var(--br);display:flex;align-items:center;gap:9px}
+.av{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;cursor:pointer;transition:opacity var(--tr)}
+.av:hover{opacity:.85}
+.av-name{font-size:13px;font-weight:600;color:var(--t1)}
+.av-sub{font-size:11px;color:var(--t3)}
+.sb-nav{flex:1;padding:9px 7px;overflow-y:auto}
+.nav-sec{font-size:10px;font-weight:600;color:var(--t3);letter-spacing:.8px;text-transform:uppercase;padding:7px 9px 4px}
+.ni{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:var(--r-sm);font-size:13px;font-weight:500;color:var(--t2);cursor:pointer;transition:all var(--tr);margin-bottom:1px;position:relative}
+.ni:hover{background:var(--sf3);color:var(--t1)}
+.ni.ac{background:var(--as);color:var(--accent);font-weight:600}
+.ni-badge{margin-left:auto;font-size:9px;font-weight:700;background:var(--accent);color:#fff;border-radius:var(--r-pill);padding:1px 5px}
+.ni-bdg-a{margin-left:auto;font-size:9px;font-weight:700;background:var(--amber);color:#fff;border-radius:var(--r-pill);padding:1px 5px}
+.sb-ft{padding:11px 13px;border-top:1px solid var(--br)}
+.plan-chip{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;border-radius:var(--r-sm);background:var(--as);border:1px solid var(--ab);cursor:pointer;transition:all var(--tr)}
+.plan-chip:hover{background:var(--accent);border-color:var(--accent)}
+.plan-chip:hover .plan-lbl,.plan-chip:hover .plan-n{color:#fff}
+.plan-lbl{font-size:11px;color:var(--t2);transition:color var(--tr)}
+.plan-n{font-size:12px;font-weight:700;color:var(--accent);transition:color var(--tr)}
+/* Dash main */
+.dm{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.dtbar{height:52px;background:var(--sf);border-bottom:1px solid var(--br);display:flex;align-items:center;justify-content:space-between;padding:0 22px;position:sticky;top:0;z-index:50}
+.dtitle{font-size:15px;font-weight:700}
+.dtr{display:flex;align-items:center;gap:9px;position:relative}
+.icon-btn{width:31px;height:31px;border-radius:var(--r-sm);background:var(--sf3);border:1px solid var(--br);display:flex;align-items:center;justify-content:center;color:var(--t2);transition:all var(--tr);position:relative;cursor:pointer}
+.icon-btn:hover{color:var(--t1);border-color:var(--br2)}
+.notif-dot{position:absolute;top:5px;right:5px;width:5px;height:5px;border-radius:50%;background:var(--amber);border:1.5px solid var(--sf)}
+.stat-pill{display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;background:var(--gs);border:1px solid var(--gb);color:var(--green);border-radius:var(--r-pill);padding:3px 9px}
+.pulse{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pls 2s ease-in-out infinite}
+@keyframes pls{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.7)}}
+/* Panel system */
+.dc{flex:1;padding:22px;overflow-y:auto}
+.pv{display:none}
+.pv.ac{display:block;animation:fadu .22s ease}
+.phead{margin-bottom:20px}
+.ptitle{font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:3px}
+.psub{font-size:13px;color:var(--t2)}
+
+/* ── OVERVIEW ── */
+.stat-row{display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+.stat-c{flex:1;min-width:120px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r-md);padding:13px 15px;box-shadow:var(--sh)}
+.stat-lbl{font-size:11px;color:var(--t3);margin-bottom:4px}
+.stat-val{font-size:22px;font-weight:800;letter-spacing:-.5px;color:var(--t1)}
+.stat-sub{font-size:11px;color:var(--t3);margin-top:2px}
+/* Tracker */
+.tkr-item{display:flex;align-items:center;gap:12px;padding:10px 13px;border-radius:var(--r-md);background:var(--sf2);border:1px solid var(--br);margin-bottom:9px}
+.tkr-item:last-child{margin-bottom:0}
+.tkr-bw{width:120px;flex-shrink:0}
+.tkr-pct{font-size:11px;font-weight:700;min-width:28px;text-align:right}
+/* Deadlines */
+.dl-item{display:flex;align-items:flex-start;gap:9px;padding:10px 12px;border-radius:var(--r-md);border:1px solid var(--br);background:var(--sf2);margin-bottom:8px;cursor:pointer;transition:all var(--tr)}
+.dl-item:hover{border-color:var(--br2)}
+.dl-item:last-child{margin-bottom:0}
+.dl-item.urgent{border-color:var(--amb);background:var(--ams)}
+.dl-item.done-item{opacity:.5}
+.dl-dot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.dd-r{background:var(--red)}.dd-a{background:var(--amber)}.dd-g{background:var(--green)}
+.dl-text{font-size:12.5px;font-weight:500;color:var(--t1);line-height:1.4}
+.dl-date{font-size:11px;color:var(--t2);margin-top:2px}
+
+/* ── DOCUMENT VAULT ── */
+.filter-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.ftab{font-size:12px;font-weight:500;padding:5px 12px;border-radius:var(--r-pill);border:1px solid var(--br);color:var(--t2);background:var(--sf);cursor:pointer;transition:all var(--tr)}
+.ftab.ac{background:var(--as);color:var(--accent);border-color:var(--ab)}
+.ftab:hover:not(.ac){color:var(--t1)}
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.doc-tile{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:14px 12px;cursor:pointer;transition:all var(--tr);display:flex;flex-direction:column;gap:8px;position:relative}
+.doc-tile:hover{border-color:var(--br2);box-shadow:var(--sh)}
+.doc-tile.add-t{border-style:dashed;border-color:var(--br2);align-items:center;justify-content:center;min-height:100px;gap:5px}
+.doc-tile.add-t:hover{border-color:var(--accent);background:var(--as)}
+.doc-title{font-size:12px;font-weight:600;color:var(--t1);line-height:1.4}
+.doc-meta{font-size:11px;color:var(--t3)}
+
+/* ── TRACKER ── */
+.tr-card{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:15px 17px;margin-bottom:13px}
+.tr-card:last-child{margin-bottom:0}
+.tr-h{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.req-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+
+/* ── EVALUATOR ── */
+.dropzone{border:2px dashed var(--br2);border-radius:var(--r-md);padding:26px;text-align:center;cursor:pointer;transition:all var(--tr);background:var(--sf2)}
+.dropzone:hover,.dropzone.drag-over{border-color:var(--accent);background:var(--as)}
+.dropzone.loaded{border-color:var(--gb);background:var(--gs);border-style:solid}
+.dz-title{font-size:13px;font-weight:600;color:var(--t1);margin:7px 0 4px}
+.dz-sub{font-size:12px;color:var(--t3)}
+.sel-ctrl{width:100%;padding:8px 11px;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-sm);font-size:13px;color:var(--t1);outline:none;appearance:none;cursor:pointer;transition:border-color var(--tr)}
+.sel-ctrl:focus{border-color:var(--accent)}
+.score-wrap{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:var(--r-md);background:var(--sf2);border:1px solid var(--br)}
+.score-circ{width:62px;height:62px;border-radius:50%;flex-shrink:0;background:conic-gradient(var(--accent) 82%,var(--sf3) 0);position:relative}
+.score-inner{position:absolute;inset:6px;border-radius:50%;background:var(--sf2);display:flex;align-items:center;justify-content:center;flex-direction:column}
+.s-num{font-size:16px;font-weight:800;line-height:1}
+.s-den{font-size:9px;color:var(--t3)}
+.sug-list{display:flex;flex-direction:column;gap:5px;margin-top:10px}
+.sug{display:flex;align-items:flex-start;gap:6px;font-size:12px;color:var(--t2);line-height:1.4}
+
+/* ── PORTFOLIO ── */
+.repo-card{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:14px 15px;margin-bottom:13px}
+.repo-name{font-size:14px;font-weight:600;color:var(--accent);cursor:pointer}
+.repo-desc{font-size:12.5px;color:var(--t2);line-height:1.5;margin-bottom:10px;margin-top:6px}
+.lang-tags{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.ltag{font-size:10px;font-weight:600;padding:2px 7px;background:var(--sf3);border:1px solid var(--br);color:var(--t2);border-radius:var(--r-xs)}
+.repo-stats{display:flex;gap:12px}
+.rstats{font-size:11px;color:var(--t3);display:flex;align-items:center;gap:4px}
+.ai-gen-box{margin-top:12px;border:1px solid var(--ab);border-radius:var(--r-md);background:var(--as);overflow:hidden}
+.ai-gen-hd{display:flex;align-items:center;justify-content:space-between;padding:7px 11px;border-bottom:1px solid var(--ab)}
+.ai-gen-body{padding:10px 12px;font-size:12.5px;color:var(--t1);line-height:1.6;border-left:3px solid var(--accent)}
+.char-note{font-size:10px;color:var(--t3);padding:4px 12px 8px;text-align:right}
+/* Skill bars */
+.skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.sk-row{display:flex;flex-direction:column;gap:3px}
+.sk-lbl{display:flex;justify-content:space-between;font-size:12px;color:var(--t2)}
+
+/* ── SOP ── */
+.sop-ed{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:13px;width:100%;min-height:140px;font-size:13px;line-height:1.7;color:var(--t1);resize:none;outline:none;transition:border-color var(--tr)}
+.sop-ed:focus{border-color:var(--accent)}
+.sop-split{display:grid;grid-template-columns:1fr 1fr;gap:13px;margin-top:14px}
+.sop-ver{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);overflow:hidden}
+.sop-vh{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--br);background:var(--sf3)}
+.sop-vname{font-size:12px;font-weight:700}
+.sop-vb{padding:13px;font-size:12.5px;line-height:1.7;color:var(--t2);max-height:220px;overflow-y:auto}
+.hlp{background:rgba(99,102,241,.15);color:var(--accent);border-radius:3px;padding:0 2px;font-weight:600}
+.hlg{background:var(--gs);color:var(--green);border-radius:3px;padding:0 2px;font-weight:600}
+.ai-swap-note{margin-top:10px;padding:8px 12px;background:var(--sf3);border-radius:var(--r-sm);font-size:11.5px;color:var(--t2);display:flex;align-items:center;gap:6px}
+
+/* ── SCHOLARSHIPS ── */
+.kanban{display:grid;grid-template-columns:1fr 1fr 1fr;gap:13px}
+.kc{display:flex;flex-direction:column}
+.kh{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:var(--sf2);border:1px solid var(--br);border-bottom:none;border-radius:var(--r-md) var(--r-md) 0 0}
+.kct{font-size:12px;font-weight:600;color:var(--t2)}
+.kcnt{font-size:10px;font-weight:700;color:var(--t3);background:var(--sf3);border-radius:99px;padding:1px 7px}
+.kb{flex:1;padding:10px;min-height:260px;background:var(--sf2);border:1px solid var(--br);border-top:2px solid;border-radius:0 0 var(--r-md) var(--r-md);display:flex;flex-direction:column;gap:8px}
+.kb-ac{border-top-color:var(--accent)}
+.kb-am{border-top-color:var(--amber)}
+.kb-gr{border-top-color:var(--green)}
+.grant-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r-md);padding:12px;transition:all var(--tr)}
+.grant-card:hover{border-color:var(--br2);box-shadow:var(--sh)}
+.gname{font-size:12.5px;font-weight:600;color:var(--t1);margin-bottom:3px;line-height:1.4}
+.gamt{font-size:16px;font-weight:800;color:var(--green);letter-spacing:-.5px;margin-bottom:5px}
+.gdesc{font-size:11.5px;color:var(--t2);line-height:1.5;margin-bottom:9px}
+.gen-btn{width:100%;padding:7px 10px;background:var(--as);border:1px solid var(--ab);border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--accent);transition:all var(--tr);display:flex;align-items:center;justify-content:center;gap:5px}
+.gen-btn:hover{background:var(--accent);color:#fff}
+.sub-btn{width:100%;padding:7px 10px;background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);font-size:12px;font-weight:600;color:var(--green);transition:all var(--tr);display:flex;align-items:center;justify-content:center;gap:5px}
+.sub-btn:hover{background:var(--green);color:#fff}
+
+/* ── INTERVIEW ── */
+.int-orb-wrap{display:flex;flex-direction:column;align-items:center;padding:26px;border-radius:var(--r-xl);background:var(--sf2);border:1px solid var(--br);margin-bottom:14px}
+.orb{width:84px;height:84px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,.25),rgba(168,85,247,.25));border:2px solid rgba(99,102,241,.35);display:flex;align-items:center;justify-content:center;margin-bottom:13px;position:relative;box-shadow:0 0 30px rgba(99,102,241,.18);animation:obs 3s ease-in-out infinite}
+@keyframes obs{0%,100%{box-shadow:0 0 22px rgba(99,102,241,.15)}50%{box-shadow:0 0 42px rgba(99,102,241,.3)}}
+.orb.paused{animation:none;opacity:.6}
+.orb.ended{animation:none;opacity:.4;border-color:var(--rb)}
+.orb-ring{position:absolute;inset:-8px;border-radius:50%;border:1px solid rgba(99,102,241,.14);animation:orr 2.5s ease-in-out infinite}
+@keyframes orr{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.03)}}
+.live-lbl{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.live-lbl.paused{color:var(--amber)}
+.live-lbl.ended{color:var(--t3)}
+.int-q{font-size:14px;font-weight:500;color:var(--t1);text-align:center;max-width:340px;line-height:1.5;margin-bottom:15px}
+.waveform{display:flex;align-items:center;justify-content:center;gap:3px;height:38px;margin-bottom:14px}
+.wb{width:3px;border-radius:99px;background:linear-gradient(180deg,var(--accent),rgba(99,102,241,.3));animation:wa 1.1s ease-in-out infinite}
+.waveform.paused .wb{animation:none;height:4px !important;opacity:.4}
+.waveform.ended .wb{animation:none;height:2px !important;opacity:.2}
+.wb:nth-child(1){height:10px;animation-delay:0s}
+.wb:nth-child(2){height:22px;animation-delay:.08s}
+.wb:nth-child(3){height:34px;animation-delay:.17s}
+.wb:nth-child(4){height:38px;animation-delay:.12s}
+.wb:nth-child(5){height:26px;animation-delay:.04s}
+.wb:nth-child(6){height:14px;animation-delay:.22s}
+.wb:nth-child(7){height:34px;animation-delay:.28s}
+.wb:nth-child(8){height:38px;animation-delay:.09s}
+.wb:nth-child(9){height:28px;animation-delay:.18s}
+.wb:nth-child(10){height:18px;animation-delay:.04s}
+.wb:nth-child(11){height:32px;animation-delay:.3s}
+.wb:nth-child(12){height:22px;animation-delay:.13s}
+@keyframes wa{0%,100%{transform:scaleY(1);opacity:.6}50%{transform:scaleY(1.6);opacity:1}}
+.int-ctrls{display:flex;align-items:center;justify-content:center;gap:10px}
+.ctrl{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--sf3);border:1px solid var(--br);color:var(--t2);transition:all var(--tr)}
+.ctrl:hover{background:var(--sf);color:var(--t1)}
+.ctrl-main{width:48px;height:48px;background:var(--accent);border:none;color:#fff;box-shadow:0 4px 12px rgba(99,102,241,.35)}
+.ctrl-main:hover{background:var(--ah)}
+.ctrl-main.recording{background:var(--red);box-shadow:0 4px 12px rgba(239,68,68,.35);animation:rec-pulse 1.5s ease-in-out infinite}
+@keyframes rec-pulse{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 8px rgba(239,68,68,.0)}}
+.int-metric{background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:12px;text-align:center;margin-bottom:8px}
+.im-score{font-size:26px;font-weight:800;letter-spacing:-1px;margin-bottom:2px}
+.im-lbl{font-size:11px;color:var(--t2);line-height:1.4}
+.m-bar-bg{height:3px;background:var(--sf3);border-radius:99px;margin-top:7px}
+.m-bar{height:3px;border-radius:99px}
+.int-ended-wrap{display:flex;flex-direction:column;align-items:center;padding:28px;border-radius:var(--r-xl);background:var(--sf2);border:1px solid var(--br);text-align:center}
+.int-qs{display:flex;flex-direction:column;gap:8px}
+.int-q-item{border-left:2px solid;padding-left:10px;font-size:12.5px;color:var(--t2);line-height:1.6}
+.int-q-lbl{font-size:10px;font-weight:700;letter-spacing:.5px;margin-bottom:2px}
+
+/* ── PLANS ── */
+.plans-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.plan-card{background:var(--sf);border:1px solid var(--br);border-radius:var(--r-lg);padding:22px;position:relative;transition:all var(--tr)}
+.plan-card.current{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent),var(--shl)}
+.plan-card:hover:not(.current){border-color:var(--br2);box-shadow:var(--shl)}
+.plan-badge{position:absolute;top:-10px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:var(--r-pill);padding:2px 10px;white-space:nowrap}
+.plan-name{font-size:16px;font-weight:700;margin-bottom:4px}
+.plan-price{font-size:28px;font-weight:800;letter-spacing:-1px;color:var(--t1);margin-bottom:6px}
+.plan-price span{font-size:14px;font-weight:500;color:var(--t2)}
+.plan-tagline{font-size:12px;color:var(--t2);margin-bottom:16px;line-height:1.4}
+.plan-feats{display:flex;flex-direction:column;gap:8px;margin-bottom:18px}
+.pf{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--t2);line-height:1.4}
+.pf i{flex-shrink:0;margin-top:1px}
+.pf.yes{color:var(--t1)}
+.pf.no{opacity:.4}
+
+/* ── PROFILE ── */
+.profile-av-wrap{display:flex;flex-direction:column;align-items:center;margin-bottom:18px}
+.profile-av{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--accent),#a855f7);display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;color:#fff;cursor:pointer;position:relative;transition:opacity var(--tr)}
+.profile-av:hover{opacity:.85}
+.av-edit-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity var(--tr)}
+.profile-av:hover .av-edit-overlay{opacity:1}
+.field-grp{margin-bottom:13px}
+.field-lbl{font-size:12px;font-weight:600;color:var(--t2);margin-bottom:5px}
+.field-inp{width:100%;padding:8px 11px;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-sm);font-size:13px;color:var(--t1);outline:none;transition:border-color var(--tr)}
+.field-inp:focus{border-color:var(--accent)}
+.field-inp:disabled{opacity:.55;cursor:not-allowed}
+.field-static{padding:8px 11px;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-sm);font-size:13px;color:var(--t2)}
+/* ── Settings ── */
+.stg-item{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--br)}
+.stg-item:last-child{border-bottom:none}
+.stg-lbl{font-size:13px;font-weight:500}
+.stg-sub{font-size:12px;color:var(--t3);margin-top:2px}
+.toggle-sw{width:38px;height:21px;border-radius:var(--r-pill);background:var(--sf3);border:1.5px solid var(--br2);cursor:pointer;position:relative;transition:background var(--tr)}
+.toggle-sw.on{background:var(--accent);border-color:var(--accent)}
+.toggle-sw::after{content:'';position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:#fff;transition:transform var(--tr);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.toggle-sw.on::after{transform:translateX(17px)}
+/* Misc utilities */
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt14{margin-top:14px}.mt16{margin-top:16px}
+.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}
+.flex{display:flex}.items-c{align-items:center}
+.gap6{gap:6px}.gap8{gap:8px}.gap10{gap:10px}.gap12{gap:12px}
+.f1{flex:1}.just-sb{justify-content:space-between}
+.t2{color:var(--t2)}.t3{color:var(--t3)}.fw6{font-weight:600}.fw7{font-weight:700}
+.tsm{font-size:12px}.txs{font-size:11px}
+.hidden{display:none}
+/* Interview start screen */
+.int-start-wrap{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 26px;border-radius:var(--r-xl);background:var(--sf2);border:1px solid var(--br)}
+.int-orb-idle{width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,rgba(99,102,241,.2),rgba(168,85,247,.15));border:2px solid rgba(99,102,241,.25);display:flex;align-items:center;justify-content:center;margin-bottom:18px;position:relative;cursor:pointer;transition:all .25s}
+.int-orb-idle:hover{box-shadow:0 0 32px rgba(99,102,241,.28);border-color:rgba(99,102,241,.5)}
+.int-orb-idle::after{content:'';position:absolute;inset:-10px;border-radius:50%;border:1px solid rgba(99,102,241,.1)}
+.int-mode-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%;margin:16px 0}
+.int-mode-opt{padding:10px 12px;border-radius:var(--r-sm);border:1.5px solid var(--br2);cursor:pointer;transition:all var(--tr);text-align:left}
+.int-mode-opt:hover{border-color:var(--accent);background:var(--as)}
+.int-mode-opt.sel{border-color:var(--accent);background:var(--as)}
+.int-mode-title{font-size:13px;font-weight:600;color:var(--t1);margin-bottom:2px}
+.int-mode-sub{font-size:11px;color:var(--t2)}
+/* doc tile delete btn */
+.doc-del{position:absolute;top:6px;right:6px;width:20px;height:20px;border-radius:4px;background:var(--rs);border:1px solid var(--rb);display:none;align-items:center;justify-content:center;color:var(--red);cursor:pointer;transition:all var(--tr);z-index:2}
+.doc-del:hover{background:var(--red);color:#fff}
+.doc-tile:hover .doc-del{display:flex}
+/* spin keyframe */
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+
+<div id="toast-wrap"></div>
+<input type="file" id="file-inp" accept=".pdf,.doc,.docx,.png,.jpg" style="display:none" multiple/>
+
+<!-- ═══════════ FLOATING NAV ═══════════ -->
+<nav class="fnav" id="fnav">
+  <div style="display:flex;align-items:center;gap:10px">
+    <button class="back-btn" id="back-btn" onclick="navBack()">
+      <i data-lucide="arrow-left" width="13" height="13"></i> Back
+    </button>
+    <div class="nlogo" onclick="goHome()">
+      <div class="logo-sq">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+      </div>
+      <span class="nlogo-text">PathWay</span>
+    </div>
+  </div>
+  <div class="nright">
+    <div class="ttoggle">
+      <button class="tbtn active" id="btn-dark" onclick="setTheme('dark')"><i data-lucide="moon" width="12" height="12"></i></button>
+      <button class="tbtn" id="btn-light" onclick="setTheme('light')"><i data-lucide="sun" width="12" height="12"></i></button>
+    </div>
+    <span class="nlink" onclick="goTo('matches')">Browse Programs</span>
+    <span class="nlink" onclick="goTo('dashboard')">Dashboard</span>
+  </div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     STATE 1: ONBOARDING
+═══════════════════════════════════════ -->
+<div class="screen active" id="sc-onboard">
+  <div class="obwrap">
+    <div class="step-dots">
+      <div class="sdot here" id="sd1"></div>
+      <div class="sdot" id="sd2"></div>
+      <div class="sdot" id="sd3"></div>
+    </div>
+
+    <!-- Step 1 -->
+    <div id="obs1" class="fad">
+      <div class="ob-q">What are your core<br>academic interests?</div>
+      <div class="ob-sub">Select all that apply. We will find programs built for you.</div>
+      <div class="tag-grid" id="interest-tags">
+        <div class="tag-chip sel" onclick="toggleTag(this)">Artificial Intelligence</div>
+        <div class="tag-chip sel" onclick="toggleTag(this)">Healthcare AI</div>
+        <div class="tag-chip sel" onclick="toggleTag(this)">Optimization</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Computer Vision</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Data Engineering</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Robotics</div>
+        <div class="tag-chip" onclick="toggleTag(this)">NLP and LLMs</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Computational Biology</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Quantum Computing</div>
+        <div class="tag-chip" onclick="toggleTag(this)">Software Systems</div>
+      </div>
+      <div class="ob-ft">
+        <span class="step-txt">Step 1 of 2</span>
+        <button class="btn-p" onclick="nextStep()">Continue <i data-lucide="arrow-right" width="14" height="14"></i></button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div id="obs2" style="display:none">
+      <div class="ob-q">What degree level<br>are you pursuing?</div>
+      <div class="ob-sub">This helps us calibrate program requirements and timelines.</div>
+      <div class="radio-grp">
+        <div class="r-opt" onclick="selectRadio(this)"><div class="rcircle"></div><div><div class="rlabel">Bachelor's</div><div class="rsub">Undergraduate, typically 3 to 4 years</div></div></div>
+        <div class="r-opt sel" onclick="selectRadio(this)"><div class="rcircle"></div><div><div class="rlabel">Master's leading to PhD</div><div class="rsub">Research track with doctoral pathway opportunities</div></div></div>
+        <div class="r-opt" onclick="selectRadio(this)"><div class="rcircle"></div><div><div class="rlabel">Master's (Professional)</div><div class="rsub">Career-focused, industry-oriented graduate degree</div></div></div>
+        <div class="r-opt" onclick="selectRadio(this)"><div class="rcircle"></div><div><div class="rlabel">Direct PhD</div><div class="rsub">Research doctorate program</div></div></div>
+      </div>
+      <div class="ob-ft">
+        <button class="btn-g" onclick="prevStep()"><i data-lucide="arrow-left" width="13" height="13"></i> Back</button>
+        <span class="step-txt">Step 2 of 2</span>
+        <button class="btn-p" onclick="discover()">Discover My Path <i data-lucide="sparkles" width="13" height="13"></i></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STATE 2: MATCHES / BROWSE PROGRAMS
+═══════════════════════════════════════ -->
+<div class="screen" id="sc-matches">
+  <div class="mc-wrap">
+    <div class="mc-h">Your Matched Programs</div>
+    <div class="mc-sub">Sorted by compatibility with your interests and profile</div>
+    <div class="mtags" id="mtags">
+      <span class="mtag">Artificial Intelligence</span>
+      <span class="mtag">Healthcare AI</span>
+      <span class="mtag">Optimization</span>
+      <span class="mtag">Master's to PhD Track</span>
+    </div>
+
+    <!-- Search and filter row -->
+    <div class="sf-row">
+      <div class="search-box">
+        <i data-lucide="search" width="14" height="14" style="color:var(--t3);flex-shrink:0"></i>
+        <input type="text" id="uni-search" placeholder="Search universities or programs..." oninput="filterUnis()"/>
+      </div>
+      <button class="flt-btn ac" id="flt-all" onclick="filterCountry('all',this)">All</button>
+      <button class="flt-btn" id="flt-ch" onclick="filterCountry('Switzerland',this)">Switzerland</button>
+      <button class="flt-btn" id="flt-de" onclick="filterCountry('Germany',this)">Germany</button>
+      <button class="flt-btn" id="flt-uk" onclick="filterCountry('UK',this)">UK</button>
+      <button class="flt-btn" id="flt-nl" onclick="filterCountry('Netherlands',this)">Netherlands</button>
+      <button class="flt-btn" id="flt-sc" onclick="filterCountry('Scandinavia',this)">Scandinavia</button>
+    </div>
+    <div class="results-count" id="results-count">Showing 12 universities</div>
+
+    <!-- UNIVERSITY CARDS -->
+    <!-- ETH Zurich -->
+    <div class="mc-card" id="mc-eth" data-country="Switzerland" data-name="ETH Zurich Data Science">
+      <div class="mc-hd" onclick="toggleMC('mc-eth')">
+        <div class="mc-left"><div class="sbadge b-eth">ETH</div><div><div class="mc-sname">ETH Zurich</div><div class="mc-prog">M.Sc. Data Science - Zurich, Switzerland - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-ac">96% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 15/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">Target 7.0 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="file-text" width="13" height="13" class="st-warn"></i><span class="req-label">Statement of Purpose</span><span class="req-val">500 to 1000 words</span><span class="st-warn txs fw6">Draft</span></div>
+          <div class="req-item"><i data-lucide="users" width="13" height="13" class="st-miss"></i><span class="req-label">Letters of Recommendation</span><span class="req-val">2 required</span><span class="st-miss txs fw6">1 of 2</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">June 1, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('ETH Zurich','M.Sc. Data Science','eth')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://inf.ethz.ch/studies/master/master-ds.html" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- EPFL -->
+    <div class="mc-card" id="mc-epl" data-country="Switzerland" data-name="EPFL Data Science">
+      <div class="mc-hd" onclick="toggleMC('mc-epl')">
+        <div class="mc-left"><div class="sbadge b-epl">EPF</div><div><div class="mc-sname">EPFL</div><div class="mc-prog">M.Sc. Data Science - Lausanne, Switzerland - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-ac">89% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 15/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS or TOEFL</span><span class="req-val">6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="file-text" width="13" height="13"></i><span class="req-label">Motivation Letter</span><span class="req-val">1 page max</span><span class="st-warn txs fw6">Draft</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">December 15, 2025</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('EPFL','M.Sc. Data Science','epl')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.epfl.ch/education/master/programs/data-science/" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TU Munich -->
+    <div class="mc-card" id="mc-tum" data-country="Germany" data-name="TU Munich Informatics AI">
+      <div class="mc-hd" onclick="toggleMC('mc-tum')">
+        <div class="mc-left"><div class="sbadge b-tum">TUM</div><div><div class="mc-sname">TU Munich</div><div class="mc-prog">M.Sc. Informatics (AI) - Munich, Germany - Submitted</div></div></div>
+        <div class="mc-right"><span class="sp sp-g">91% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 14.5/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-ok"></i><span class="req-label">IELTS</span><span class="req-val">6.5 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="file-check" width="13" height="13" class="st-ok"></i><span class="req-label">Motivation Letter</span><span class="req-val">1 page</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">Submitted April 3, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-out" onclick="showPanel('tracker',document.getElementById('sni-tracker'))"><i data-lucide="bar-chart-2" width="11" height="11"></i> View Progress</button>
+          <a href="https://www.tum.de/en/studies/degree-programs/detail/informatics-master-of-science-msc" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- University of Amsterdam -->
+    <div class="mc-card" id="mc-uva" data-country="Netherlands" data-name="University of Amsterdam Artificial Intelligence">
+      <div class="mc-hd" onclick="toggleMC('mc-uva')">
+        <div class="mc-left"><div class="sbadge b-uva">UvA</div><div><div class="mc-sname">University of Amsterdam</div><div class="mc-prog">M.Sc. Artificial Intelligence - Amsterdam, Netherlands - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-ac">86% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 14/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="file-text" width="13" height="13"></i><span class="req-label">Motivation Letter</span><span class="req-val">2 pages max</span><span class="st-warn txs fw6">Not started</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">April 1, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('Univ. of Amsterdam','M.Sc. AI','uva')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.uva.nl/en/programmes/masters/artificial-intelligence/artificial-intelligence.html" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- KTH Stockholm -->
+    <div class="mc-card" id="mc-kth" data-country="Scandinavia" data-name="KTH Stockholm Machine Learning">
+      <div class="mc-hd" onclick="toggleMC('mc-kth')">
+        <div class="mc-left"><div class="sbadge b-kth">KTH</div><div><div class="mc-sname">KTH Royal Institute of Technology</div><div class="mc-prog">M.Sc. Machine Learning - Stockholm, Sweden - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">84% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 14/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">January 15, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('KTH Stockholm','M.Sc. Machine Learning','kth')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.kth.se/en/studies/master/machine-learning" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Imperial College -->
+    <div class="mc-card" id="mc-imp" data-country="UK" data-name="Imperial College London Machine Learning">
+      <div class="mc-hd" onclick="toggleMC('mc-imp')">
+        <div class="mc-left"><div class="sbadge b-imp">IMP</div><div><div class="mc-sname">Imperial College London</div><div class="mc-prog">M.Sc. Machine Learning - London, UK - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">82% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">First-class equivalent (15.5/20 or higher)</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">7.0 overall, 6.5 per component</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="users" width="13" height="13"></i><span class="req-label">Letters of Recommendation</span><span class="req-val">2 required</span><span class="st-miss txs fw6">1 of 2</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">March 31, 2026 (Rolling)</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('Imperial College London','M.Sc. Machine Learning','imp')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.imperial.ac.uk/computing/prospective-students/courses/pg/msc-machine-learning/" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Aalto University -->
+    <div class="mc-card" id="mc-aal" data-country="Scandinavia" data-name="Aalto University Machine Learning Data Science AI">
+      <div class="mc-hd" onclick="toggleMC('mc-aal')">
+        <div class="mc-left"><div class="sbadge b-aal">AAL</div><div><div class="mc-sname">Aalto University</div><div class="mc-prog">M.Sc. ML, Data Science and AI - Helsinki, Finland - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">81% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 13.5/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="code-2" width="13" height="13" class="st-ok"></i><span class="req-label">Technical Portfolio</span><span class="req-val">GitHub encouraged</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">January 22, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('Aalto University','M.Sc. ML and AI','aal')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.aalto.fi/en/programmes/master-s-programme-in-machine-learning-data-science-and-artificial-intelligence" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- University of Edinburgh -->
+    <div class="mc-card" id="mc-edi" data-country="UK" data-name="University of Edinburgh Machine Learning">
+      <div class="mc-hd" onclick="toggleMC('mc-edi')">
+        <div class="mc-left"><div class="sbadge b-edi">EDI</div><div><div class="mc-sname">University of Edinburgh</div><div class="mc-prog">M.Sc. Machine Learning - Edinburgh, UK - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">80% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">2.1 Honours equivalent (14.5/20)</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">7.0 overall</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">April 30, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('Univ. of Edinburgh','M.Sc. Machine Learning','edi')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.ed.ac.uk/studying/postgraduate/degrees/index.php?r=site/view&id=107" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- UCL -->
+    <div class="mc-card" id="mc-ucl" data-country="UK" data-name="UCL Machine Learning">
+      <div class="mc-hd" onclick="toggleMC('mc-ucl')">
+        <div class="mc-left"><div class="sbadge b-ucl">UCL</div><div><div class="mc-sname">University College London</div><div class="mc-prog">M.Sc. Machine Learning - London, UK - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">79% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Upper second-class (14/20 equivalent)</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">7.0 overall, 6.5 per component</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="users" width="13" height="13"></i><span class="req-label">References</span><span class="req-val">2 required</span><span class="st-miss txs fw6">1 of 2</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">March 28, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('UCL','M.Sc. Machine Learning','ucl')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.ucl.ac.uk/prospective-students/graduate/taught-degrees/machine-learning-msc" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- TU Delft -->
+    <div class="mc-card" id="mc-del" data-country="Netherlands" data-name="TU Delft Computer Science">
+      <div class="mc-hd" onclick="toggleMC('mc-del')">
+        <div class="mc-left"><div class="sbadge b-del">DEL</div><div><div class="mc-sname">TU Delft</div><div class="mc-prog">M.Sc. Computer Science (AI track) - Delft, Netherlands - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">78% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 14/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS</span><span class="req-val">6.5 overall</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">February 1, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('TU Delft','M.Sc. Computer Science','del')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.tudelft.nl/onderwijs/opleidingen/masters/cs/msc-computer-science" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RWTH Aachen -->
+    <div class="mc-card" id="mc-rw" data-country="Germany" data-name="RWTH Aachen Data Science">
+      <div class="mc-hd" onclick="toggleMC('mc-rw')">
+        <div class="mc-left"><div class="sbadge b-rw">RW</div><div><div class="mc-sname">RWTH Aachen University</div><div class="mc-prog">M.Sc. Data Science - Aachen, Germany - Winter 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-a">75% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 13.5/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">IELTS or TOEFL</span><span class="req-val">6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">July 15, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('RWTH Aachen','M.Sc. Data Science','rw')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://www.rwth-aachen.de/cms/root/studium/Vor-dem-Studium/Studiengaenge/" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- University of Copenhagen -->
+    <div class="mc-card" id="mc-cph" data-country="Scandinavia" data-name="University of Copenhagen Computer Science">
+      <div class="mc-hd" onclick="toggleMC('mc-cph')">
+        <div class="mc-left"><div class="sbadge b-cph">KU</div><div><div class="mc-sname">University of Copenhagen</div><div class="mc-prog">M.Sc. Computer Science (AI) - Copenhagen, Denmark - Fall 2026</div></div></div>
+        <div class="mc-right"><span class="sp sp-gr">72% match</span><i data-lucide="chevron-down" width="14" height="14" class="exp-ic"></i></div>
+      </div>
+      <div class="mc-body">
+        <div class="req-list">
+          <div class="req-item"><i data-lucide="graduation-cap" width="13" height="13" class="st-ok"></i><span class="req-label">GPA</span><span class="req-val">Target 13/20 or higher</span><i data-lucide="check-circle" width="13" height="13" class="st-ok"></i></div>
+          <div class="req-item"><i data-lucide="languages" width="13" height="13" class="st-warn"></i><span class="req-label">English Proficiency</span><span class="req-val">IELTS 6.5 or higher</span><span class="st-warn txs fw6">Pending</span></div>
+          <div class="req-item"><i data-lucide="calendar" width="13" height="13"></i><span class="req-label">Deadline</span><span class="req-val fw6">March 1, 2026</span></div>
+        </div>
+        <div class="card-acts">
+          <button class="btn-sm btn-acc" onclick="addToTracker('Univ. of Copenhagen','M.Sc. Computer Science','cph')"><i data-lucide="plus" width="11" height="11"></i> Add to Applications</button>
+          <a href="https://studies.ku.dk/masters/computer-science/" target="_blank" rel="noopener" class="uni-link"><i data-lucide="external-link" width="11" height="11"></i> Visit University Website</a>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:center;gap:10px;margin-top:24px">
+      <button class="btn-g" onclick="navBack()"><i data-lucide="arrow-left" width="13" height="13"></i> Adjust Interests</button>
+      <button class="btn-p" onclick="goTo('dashboard')">Open My Dashboard <i data-lucide="arrow-right" width="13" height="13"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     STATE 3+4: DASHBOARD
+═══════════════════════════════════════ -->
+<div class="screen" id="sc-dash">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="sb-logo">
+        <div class="logo-sq" style="cursor:pointer" onclick="goHome()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
+        </div>
+        <span class="sb-ltext">PathWay</span>
+      </div>
+      <div class="ttoggle"><button class="tbtn active" id="sb-btn-dark" onclick="setTheme('dark')"><i data-lucide="moon" width="11" height="11"></i></button><button class="tbtn" id="sb-btn-light" onclick="setTheme('light')"><i data-lucide="sun" width="11" height="11"></i></button></div>
+    </div>
+    <div class="sb-user">
+      <div class="av" onclick="showPanel('profile',document.getElementById('sni-profile'))">AZ</div>
+      <div>
+        <div class="av-name">Ahzam</div>
+        <div class="av-sub">France · M.Sc. AI</div>
+      </div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-sec">Overview</div>
+      <div class="ni ac" id="sni-overview" onclick="showPanel('overview',this)"><i data-lucide="layout-dashboard" width="13" height="13"></i> Dashboard</div>
+      <div class="ni" id="sni-browse" onclick="goTo('matches')"><i data-lucide="search" width="13" height="13"></i> Browse Programs</div>
+
+      <div class="nav-sec">Applications</div>
+      <div class="ni" id="sni-docs" onclick="showPanel('docs',this)"><i data-lucide="folder" width="13" height="13"></i> Document Vault</div>
+      <div class="ni" id="sni-tracker" onclick="showPanel('tracker',this)"><i data-lucide="activity" width="13" height="13"></i> App Tracker</div>
+
+      <div class="nav-sec">AI Features</div>
+      <div class="ni" id="sni-eval" onclick="showPanel('eval',this)"><i data-lucide="file-check" width="13" height="13"></i> CV and SOP Evaluator <span class="ni-badge">AI</span></div>
+      <div class="ni" id="sni-port" onclick="showPanel('port',this)"><i data-lucide="code-2" width="13" height="13"></i> Portfolio Analyzer <span class="ni-badge">AI</span></div>
+      <div class="ni" id="sni-sop" onclick="showPanel('sop',this)"><i data-lucide="git-compare" width="13" height="13"></i> SOP Versioning <span class="ni-badge">AI</span></div>
+      <div class="ni" id="sni-grants" onclick="showPanel('grants',this)"><i data-lucide="coins" width="13" height="13"></i> Scholarships</div>
+      <div class="ni" id="sni-int" onclick="showPanel('int',this)"><i data-lucide="mic" width="13" height="13"></i> Mock Interview <span class="ni-badge">AI</span></div>
+
+      <div class="nav-sec">Account</div>
+      <div class="ni" id="sni-profile" onclick="showPanel('profile',this)"><i data-lucide="user" width="13" height="13"></i> My Profile</div>
+      <div class="ni" id="sni-plans" onclick="showPanel('plans',this)"><i data-lucide="credit-card" width="13" height="13"></i> Plans and Pricing</div>
+    </nav>
+    <div class="sb-ft">
+      <div class="plan-chip" onclick="showPanel('plans',document.getElementById('sni-plans'))">
+        <div><div class="plan-lbl">Current plan</div><div class="plan-n">Pro - 299/mo</div></div>
+        <i data-lucide="chevron-right" width="12" height="12" style="color:var(--accent)"></i>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <div class="dm">
+    <!-- Topbar -->
+    <header class="dtbar">
+      <div id="dtitle" class="dtitle">Dashboard</div>
+      <div class="dtr">
+        <div class="stat-pill"><span class="pulse"></span> AI Online</div>
+        <div class="icon-btn" id="notif-btn" onclick="toggleNotif()">
+          <i data-lucide="bell" width="13" height="13"></i>
+          <span class="notif-dot" id="notif-dot"></span>
+        </div>
+        <div class="notif-drop" id="notif-drop">
+          <div class="notif-head"><span class="notif-title">Notifications</span><button class="tsm t2" onclick="markAllRead()" style="cursor:pointer">Mark all read</button></div>
+          <div class="notif-item" onclick="handleNotif(1)"><div class="ndot ndot-red"></div><div><div class="ntext"><strong>Urgent:</strong> Submit LOR from Prof. Adrian by March 26</div><div class="ndate">2 hours ago</div></div></div>
+          <div class="notif-item" onclick="handleNotif(2)"><div class="ndot ndot-amber"></div><div><div class="ntext">Your SOP Readiness Score is ready: 82/100</div><div class="ndate">1 day ago</div></div></div>
+          <div class="notif-item" onclick="handleNotif(3)"><div class="ndot ndot-green"></div><div><div class="ntext">TU Munich application confirmed received</div><div class="ndate">2 days ago</div></div></div>
+          <div class="notif-item" onclick="handleNotif(4)"><div class="ndot ndot-amber"></div><div><div class="ntext">New scholarship matched: Health AI Innovator Grant</div><div class="ndate">3 days ago</div></div></div>
+        </div>
+        <div class="av" style="width:28px;height:28px;font-size:11px;cursor:pointer" onclick="showPanel('profile',document.getElementById('sni-profile'))">AZ</div>
+      </div>
+    </header>
+
+    <!-- PANELS -->
+    <div class="dc">
+
+      <!-- ── OVERVIEW ── -->
+      <div class="pv ac" id="pv-overview">
+        <div class="phead">
+          <div class="ptitle">Good afternoon, Ahzam</div>
+          <div class="psub">You have 2 active applications and 1 urgent task.</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-c"><div class="stat-lbl">Profile Score</div><div class="stat-val" style="color:var(--green)">87</div><div class="stat-sub">Out of 100</div></div>
+          <div class="stat-c"><div class="stat-lbl">Applications</div><div class="stat-val">2</div><div class="stat-sub">1 submitted, 1 drafting</div></div>
+          <div class="stat-c"><div class="stat-lbl">Days to ETH Deadline</div><div class="stat-val" style="color:var(--amber)">44</div><div class="stat-sub">June 1, 2026</div></div>
+          <div class="stat-c"><div class="stat-lbl">Scholarships Matched</div><div class="stat-val">4</div><div class="stat-sub">Up to 3,000 EUR potential</div></div>
+        </div>
+        <div class="g7030" style="align-items:start">
+          <div class="gst">
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="activity" width="14" height="14" style="color:var(--accent)"></i><span class="ct">Application Tracker</span></div><button class="btn-sm btn-out tsm" onclick="showPanel('tracker',document.getElementById('sni-tracker'))">View all</button></div>
+              <div id="ov-tracker-list"></div>
+            </div>
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="calendar-clock" width="14" height="14" style="color:var(--amber)"></i><span class="ct">Upcoming Deadlines</span></div></div>
+              <div class="dl-item urgent" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-r"></div><div><div class="dl-text">Submit Letter of Recommendation from <strong>Prof. Adrian</strong></div><div class="dl-date">Deadline: March 26, 2026 - Urgent - Click to mark done</div></div></div>
+              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Upload IELTS Score Report - ETH Zurich Portal</div><div class="dl-date">Due: May 10, 2026</div></div></div>
+              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Finalize Statement of Purpose for ETH Zurich</div><div class="dl-date">Due: May 15, 2026</div></div></div>
+              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-g"></div><div><div class="dl-text">TU Munich decision expected</div><div class="dl-date">Expected: July 2026</div></div></div>
+            </div>
+          </div>
+          <div class="gst">
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="bar-chart-2" width="14" height="14" style="color:var(--accent)"></i><span class="ct">Profile Strength</span></div><span class="sp sp-ac">87/100</span></div>
+              <div style="display:flex;flex-direction:column;gap:10px">
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Academic Record</span><span class="txs fw6" style="color:var(--green)">97%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:97%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Research and Portfolio</span><span class="txs fw6" style="color:var(--green)">91%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:91%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">SOP Quality</span><span class="txs fw6" style="color:var(--amber)">72%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:72%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Language Tests</span><span class="txs fw6" style="color:var(--amber)">58%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:58%"></div></div></div>
+              </div>
+              <div class="div"></div>
+              <div class="tsm t2" style="line-height:1.5">Upload your IELTS score to push your profile to <strong style="color:var(--t1)">94+</strong></div>
+            </div>
+            <div class="card cp">
+              <div class="ct" style="margin-bottom:11px">Quick Actions</div>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <button class="btn-sm btn-acc w-full" style="justify-content:flex-start;gap:8px" onclick="triggerUpload()"><i data-lucide="upload" width="12" height="12"></i> Upload a Document</button>
+                <button class="btn-sm btn-out w-full" style="justify-content:flex-start;gap:8px" onclick="showPanel('eval',document.getElementById('sni-eval'))"><i data-lucide="file-check" width="12" height="12"></i> Evaluate my SOP</button>
+                <button class="btn-sm btn-out w-full" style="justify-content:flex-start;gap:8px" onclick="showPanel('int',document.getElementById('sni-int'))"><i data-lucide="mic" width="12" height="12"></i> Start Mock Interview</button>
+                <button class="btn-sm btn-out w-full" style="justify-content:flex-start;gap:8px" onclick="showPanel('grants',document.getElementById('sni-grants'))"><i data-lucide="coins" width="12" height="12"></i> Find Scholarships</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── DOCUMENT VAULT ── -->
+      <div class="pv" id="pv-docs">
+        <div class="phead"><div class="ptitle">Document Vault</div><div class="psub">All your application documents, centralized and organized.</div></div>
+        <div class="card cp">
+          <div class="ch">
+            <div class="ct-row"><i data-lucide="folder-open" width="14" height="14" style="color:var(--accent)"></i><span class="ct">All Documents</span></div>
+            <div style="display:flex;gap:7px">
+              <button class="btn-sm btn-acc tsm" onclick="triggerUpload()"><i data-lucide="upload" width="11" height="11"></i> Upload</button>
+            </div>
+          </div>
+          <div class="filter-tabs">
+            <button class="ftab ac" onclick="filterDocs('all',this)">All</button>
+            <button class="ftab" onclick="filterDocs('ready',this)">Ready</button>
+            <button class="ftab" onclick="filterDocs('draft',this)">Draft</button>
+            <button class="ftab" onclick="filterDocs('missing',this)">Missing</button>
+            <button class="ftab" onclick="filterDocs('pending',this)">Pending</button>
+          </div>
+          <div class="doc-grid" id="doc-grid">
+            <div class="doc-tile" data-status="ready"><button class="doc-del" onclick="deleteDoc(this.parentElement,'Academic Transcript')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('Academic Transcript')"><i data-lucide="file-text" width="22" height="22" style="color:var(--accent)"></i><div class="doc-title">Academic Transcript</div><div class="doc-meta">Uploaded Apr 2</div><span class="sp sp-g txs">Verified</span></div></div>
+            <div class="doc-tile" data-status="ready"><button class="doc-del" onclick="deleteDoc(this.parentElement,'CV Ahzam 2026')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('CV Ahzam 2026')"><i data-lucide="file" width="22" height="22" style="color:var(--accent)"></i><div class="doc-title">CV_Ahzam_2026.pdf</div><div class="doc-meta">Uploaded Apr 10</div><span class="sp sp-g txs">Ready</span></div></div>
+            <div class="doc-tile" data-status="draft"><button class="doc-del" onclick="deleteDoc(this.parentElement,'SOP ETH Zurich')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('SOP ETH Zurich')"><i data-lucide="file-edit" width="22" height="22" style="color:var(--amber)"></i><div class="doc-title">SOP - ETH Zurich</div><div class="doc-meta">Last edited Apr 17</div><span class="sp sp-a txs">Draft</span></div></div>
+            <div class="doc-tile" data-status="ready"><button class="doc-del" onclick="deleteDoc(this.parentElement,'SOP TU Munich')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('SOP TU Munich')"><i data-lucide="file-check" width="22" height="22" style="color:var(--green)"></i><div class="doc-title">SOP - TU Munich</div><div class="doc-meta">Finalized Mar 20</div><span class="sp sp-g txs">Submitted</span></div></div>
+            <div class="doc-tile" data-status="missing"><button class="doc-del" onclick="deleteDoc(this.parentElement,'IELTS Score Report')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="triggerUpload()"><i data-lucide="file-x" width="22" height="22" style="color:var(--red)"></i><div class="doc-title">IELTS Score Report</div><div class="doc-meta">Not uploaded</div><span class="sp sp-r txs">Missing</span></div></div>
+            <div class="doc-tile" data-status="ready"><button class="doc-del" onclick="deleteDoc(this.parentElement,'LOR Prof Bernard')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('LOR Prof Bernard')"><i data-lucide="file" width="22" height="22" style="color:var(--green)"></i><div class="doc-title">LOR - Prof. Bernard</div><div class="doc-meta">Received Mar 18</div><span class="sp sp-g txs">Received</span></div></div>
+            <div class="doc-tile" data-status="pending"><button class="doc-del" onclick="deleteDoc(this.parentElement,'LOR Prof Adrian')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('LOR Prof Adrian')"><i data-lucide="clock" width="22" height="22" style="color:var(--amber)"></i><div class="doc-title">LOR - Prof. Adrian</div><div class="doc-meta">Requested Mar 10</div><span class="sp sp-a txs">Pending</span></div></div>
+            <div class="doc-tile add-t" data-status="add" onclick="triggerUpload()"><i data-lucide="plus" width="18" height="18" style="color:var(--t3)"></i><span style="font-size:12px;color:var(--t3);font-weight:500">Add document</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── APP TRACKER ── -->
+      <div class="pv" id="pv-tracker">
+        <div class="phead"><div class="ptitle">Application Tracker</div><div class="psub">Track progress across all your active applications.</div></div>
+        <div id="tracker-cards"></div>
+        <button class="btn-sm btn-out mt12" onclick="goTo('matches')"><i data-lucide="plus" width="11" height="11"></i> Add New Application</button>
+      </div>
+
+      <!-- ── CV AND SOP EVALUATOR ── -->
+      <div class="pv" id="pv-eval">
+        <div class="phead"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Powered</span></div><div class="ptitle">CV and SOP Evaluator</div><div class="psub">Upload your draft, select your target program, get an instant AI readiness score.</div></div>
+        <div class="g2" style="align-items:start">
+          <div class="gst">
+            <div class="card cp">
+              <div class="ct" style="margin-bottom:12px">Upload Document</div>
+              <div class="dropzone" id="eval-dz" onclick="triggerEvalUpload()" ondragover="dzDragOver(event,'eval-dz')" ondragleave="dzDragLeave(event,'eval-dz')" ondrop="dzDrop(event,'eval-dz')">
+                <div style="display:flex;justify-content:center;color:var(--t3)"><i data-lucide="upload-cloud" width="28" height="28"></i></div>
+                <div class="dz-title">Drop your CV or SOP here</div>
+                <div class="dz-sub">PDF or DOCX - up to 10MB</div>
+              </div>
+              <input type="file" id="eval-file-inp" accept=".pdf,.doc,.docx" style="display:none" onchange="evalFileSelected(this)"/>
+              <div class="mt14">
+                <div class="tsm fw6 t2 mb8">Target Program</div>
+                <select class="sel-ctrl" id="eval-prog">
+                  <option>ETH Zurich - M.Sc. Data Science</option>
+                  <option>TU Munich - M.Sc. Informatics</option>
+                  <option>KTH Stockholm - M.Sc. Machine Learning</option>
+                  <option>EPFL - M.Sc. Data Science</option>
+                  <option>Imperial College - M.Sc. Machine Learning</option>
+                </select>
+              </div>
+              <div class="mt12">
+                <div class="tsm fw6 t2 mb8">Document Type</div>
+                <select class="sel-ctrl">
+                  <option>Statement of Purpose</option>
+                  <option>Curriculum Vitae</option>
+                  <option>Research Statement</option>
+                  <option>Motivation Letter</option>
+                </select>
+              </div>
+              <button class="btn-p w-full mt14" style="justify-content:center" onclick="runEval()"><i data-lucide="zap" width="13" height="13"></i> <span id="eval-btn-txt">Run AI Evaluation</span></button>
+            </div>
+          </div>
+          <div id="eval-result-col" class="gst">
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI Result</span><span class="ct">Readiness Score</span></div><span class="sp sp-g tsm" id="eval-school-tag">ETH Zurich</span></div>
+              <div class="score-wrap mb12">
+                <div class="score-circ"><div class="score-inner"><div class="s-num" style="color:var(--accent)" id="eval-score-num">82</div><div class="s-den">/100</div></div></div>
+                <div><div class="tsm fw6" style="margin-bottom:5px">SOP is competitive - minor improvements needed</div><div class="pb-bg" style="width:100%;height:5px"><div class="pb pb-ac" id="eval-score-bar" style="width:82%;height:5px"></div></div></div>
+              </div>
+              <div class="tsm fw6 mb8">AI Suggestions</div>
+              <div class="sug-list">
+                <div class="sug"><i data-lucide="check-circle" width="12" height="12" style="color:var(--green);flex-shrink:0"></i>Strong research narrative linking Dermaloop to AI healthcare goals</div>
+                <div class="sug"><i data-lucide="check-circle" width="12" height="12" style="color:var(--green);flex-shrink:0"></i>Good quantified results - "18% reduction in re-admission error"</div>
+                <div class="sug"><i data-lucide="arrow-right" width="12" height="12" style="color:var(--amber);flex-shrink:0"></i>Add a specific reference to Prof. Ce Zhang's research group at ETH</div>
+                <div class="sug"><i data-lucide="arrow-right" width="12" height="12" style="color:var(--amber);flex-shrink:0"></i>Opening paragraph is generic - make the hook specific to Data Science</div>
+                <div class="sug"><i data-lucide="x-circle" width="12" height="12" style="color:var(--red);flex-shrink:0"></i>Word count 1,247 - trim to under 1,000 words per ETH guidelines</div>
+              </div>
+              <button class="btn-sm btn-acc mt14" onclick="showPanel('sop',document.getElementById('sni-sop'))"><i data-lucide="git-compare" width="11" height="11"></i> Open SOP Versioning</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PORTFOLIO ── -->
+      <div class="pv" id="pv-port">
+        <div class="phead"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Powered</span></div><div class="ptitle">Technical Portfolio Analyzer</div><div class="psub">Connect your GitHub. AI extracts skills and generates CV bullet points.</div></div>
+        <div class="g7030" style="align-items:start">
+          <div class="gst">
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="github" width="14" height="14"></i><span class="ct">Connected Workspace</span></div><div style="display:flex;gap:8px;align-items:center"><span class="sp sp-g txs"><span class="pulse" style="width:4px;height:4px"></span>github.com/ahzam</span><button class="btn-sm btn-out tsm" onclick="openAddPortfolioModal()"><i data-lucide="plus" width="10" height="10"></i> Add Entry</button></div></div>
+              <div class="repo-card">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                  <div style="display:flex;align-items:center;gap:7px"><i data-lucide="folder-git-2" width="12" height="12" style="color:var(--accent)"></i><span class="repo-name">Dermaloop</span><span class="sp sp-ac" style="font-size:9px">Public</span></div>
+                  <span class="txs t3">Updated 2d ago</span>
+                </div>
+                <div class="repo-desc">Dermaloop: Digital Twin of Human Skin. Integrates microfluidics with AI controllers to monitor skin cultures. Built using Python and PyTorch for real-time data analysis.</div>
+                <div class="lang-tags"><span class="ltag">Python</span><span class="ltag">PyTorch</span><span class="ltag">Reinforcement Learning</span><span class="ltag">COMSOL</span><span class="ltag">Digital Twins</span></div>
+                <div class="repo-stats"><span class="rstats"><i data-lucide="star" width="10" height="10"></i>24</span><span class="rstats"><i data-lucide="git-branch" width="10" height="10"></i>7 branches</span><span class="rstats"><i data-lucide="file-code" width="10" height="10"></i>1,847 commits</span></div>
+                <div class="ai-gen-box">
+                  <div class="ai-gen-hd"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Generated CV Bullet</span><button class="btn-sm btn-out" style="font-size:10px;padding:3px 8px" onclick="regenBullet('dermaloop-bullet','Engineered a PyTorch digital twin of human skin integrating microfluidic simulations and RL controllers, achieving 94% bio-signal prediction accuracy across 12 physiological parameters.')"><i data-lucide="refresh-cw" width="9" height="9"></i> Regen</button></div>
+                  <div class="ai-gen-body" id="dermaloop-bullet">Engineered a PyTorch digital twin of human skin integrating microfluidic simulations and RL controllers, achieving 94% bio-signal prediction accuracy across 12 physiological parameters.</div>
+                  <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 12px 8px"><span class="char-note" style="padding:0">241 chars / 300 max</span><button class="btn-sm btn-out" style="font-size:10px;padding:3px 8px" onclick="copyText('Engineered a PyTorch digital twin of human skin integrating microfluidic simulations and RL controllers, achieving 94% bio-signal prediction accuracy across 12 physiological parameters.')"><i data-lucide="copy" width="9" height="9"></i> Copy</button></div>
+                </div>
+              </div>
+              <div class="repo-card" style="margin-bottom:0">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+                  <div style="display:flex;align-items:center;gap:7px"><i data-lucide="heart-pulse" width="12" height="12" style="color:var(--accent)"></i><span class="repo-name">BleuAI Internship</span><span class="sp sp-g" style="font-size:9px">Healthcare AI</span></div>
+                  <span class="txs t3">Jun to Dec 2025</span>
+                </div>
+                <div class="repo-desc">AI Research Intern - Developed federated NLP pipelines on FHIR-structured clinical records at BleuAI, Paris.</div>
+                <div class="lang-tags"><span class="ltag">Federated Learning</span><span class="ltag">Clinical NLP</span><span class="ltag">FHIR</span><span class="ltag">GDPR</span></div>
+                <div class="ai-gen-box">
+                  <div class="ai-gen-hd"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Generated CV Bullet</span><button class="btn-sm btn-out" style="font-size:10px;padding:3px 8px" onclick="copyText('Developed federated NLP pipelines on FHIR clinical records at BleuAI, reducing patient re-admission prediction error by 18% while maintaining full GDPR compliance.')"><i data-lucide="copy" width="9" height="9"></i> Copy</button></div>
+                  <div class="ai-gen-body">Developed federated NLP pipelines on FHIR clinical records at BleuAI, reducing patient re-admission prediction error by 18% while maintaining full GDPR compliance.</div>
+                  <div class="char-note">218 chars / 300 max</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="gst">
+            <div class="card cp">
+              <div class="ch"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> Auto-extracted</span></div>
+              <div class="ct" style="margin-bottom:11px">Skill Radar</div>
+              <div class="gst" style="gap:9px">
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Python / ML</span><span class="txs fw6" style="color:var(--green)">96%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:96%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">PyTorch / Deep Learning</span><span class="txs fw6" style="color:var(--green)">88%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:88%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">NLP and LLMs</span><span class="txs fw6" style="color:var(--green)">82%</span></div><div class="pb-bg"><div class="pb pb-ac" style="width:82%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Reinforcement Learning</span><span class="txs fw6" style="color:var(--amber)">74%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:74%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Federated Learning</span><span class="txs fw6" style="color:var(--amber)">71%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:71%"></div></div></div>
+                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Research Writing</span><span class="txs fw6" style="color:var(--green)">84%</span></div><div class="pb-bg"><div class="pb pb-ac" style="width:84%"></div></div></div>
+              </div>
+              <div class="div"></div>
+              <button class="btn-sm btn-out w-full" style="justify-content:center" onclick="showToast('Downloading full CV...','info')"><i data-lucide="download" width="11" height="11"></i> Download Full CV</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── SOP VERSIONING ── -->
+      <div class="pv" id="pv-sop">
+        <div class="phead"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Powered</span></div><div class="ptitle">Adaptive SOP Versioning</div><div class="psub">Write your master SOP once. AI tailors it to each university's research focus.</div></div>
+        <div class="card cp mb12">
+          <div class="ch"><div class="ct-row"><i data-lucide="file-text" width="14" height="14" style="color:var(--t2)"></i><span class="ct">Master SOP</span></div><div style="display:flex;gap:7px;align-items:center"><span class="sp sp-gr txs" id="sop-word-count">87 words</span><button class="btn-sm btn-acc tsm" onclick="aiImproveSOP()"><i data-lucide="sparkles" width="10" height="10"></i> AI Improve</button><button class="btn-sm btn-out tsm" onclick="syncSOPVersions()"><i data-lucide="git-compare" width="10" height="10"></i> Sync Versions</button></div></div>
+          <textarea class="sop-ed w-full" id="master-sop" rows="5" oninput="updateWordCount(this)">My name is Ahzam, and I am applying for the Master's in [PROGRAM] at [UNIVERSITY]. My academic journey - graduating with a 16.25/20 GPA - has been defined by a deep fascination with the intersection of artificial intelligence and biological systems.
+
+During my internship at BleuAI, I developed federated learning pipelines on FHIR clinical records, reducing patient re-admission error by 18%. My project "Dermaloop" - a digital twin of human skin using microfluidic simulations and RL controllers - has sharpened my ability to design AI systems in safety-critical environments.
+
+I am drawn to [UNIVERSITY] because of [PROFESSOR NAME]'s work in [RESEARCH AREA], which closely mirrors my trajectory. The [PROGRAM] curriculum, emphasizing [KEY TOPIC], provides exactly the foundation I seek.</textarea>
+          <div class="tsm t2 mt8" style="display:flex;align-items:center;gap:5px"><i data-lucide="info" width="11" height="11"></i>Edit the text above and click <strong>Sync Versions</strong> to update all university adaptations.</div>
+        </div>
+        <div class="card cp">
+          <div class="ch"><div class="ct-row"><span class="ai-lbl"><i data-lucide="git-compare" width="9" height="9"></i> AI-Adapted</span><span class="ct">University Versions</span></div>
+            <div style="display:flex;gap:10px;font-size:11.5px;color:var(--t2)">
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--accent);display:inline-block"></span>Professor</span>
+              <span style="display:flex;align-items:center;gap:4px"><span style="width:8px;height:8px;border-radius:2px;background:var(--green);display:inline-block"></span>Course</span>
+            </div>
+          </div>
+          <div class="sop-split">
+            <div class="sop-ver"><div class="sop-vh"><div style="display:flex;align-items:center;gap:7px"><div class="sbadge b-eth" style="width:22px;height:22px;font-size:9px">ETH</div><span class="sop-vname">ETH Zurich</span></div><span class="sp sp-a" style="font-size:10px">Drafting</span></div>
+              <div class="sop-vb">My name is Ahzam, and I am applying for the Master's in <span class="hlg">Data Science</span> at <span class="hlg">ETH Zurich</span>. My academic journey - graduating with a 16.25/20 GPA - has been defined by a deep fascination with AI.<br><br>During my internship at BleuAI, I developed federated learning pipelines on FHIR clinical records. My project "Dermaloop" has sharpened my ability to design AI systems in safety-critical environments.<br><br>I am drawn to ETH Zurich because of <span class="hlp">Prof. Ce Zhang</span>'s work in <span class="hlp">scalable machine learning and data management</span>. The <span class="hlg">ETH AI Center</span> curriculum, emphasizing <span class="hlg">responsible AI</span>, provides exactly the foundation I seek.</div>
+            </div>
+            <div class="sop-ver"><div class="sop-vh"><div style="display:flex;align-items:center;gap:7px"><div class="sbadge b-tum" style="width:22px;height:22px;font-size:9px">TUM</div><span class="sop-vname">TU Munich</span></div><span class="sp sp-g" style="font-size:10px">Submitted</span></div>
+              <div class="sop-vb">My name is Ahzam, and I am applying for the Master's in <span class="hlg">Informatics (AI Track)</span> at <span class="hlg">Technical University of Munich</span>. My academic journey - graduating with a 16.25/20 GPA - has been defined by a deep fascination with AI.<br><br>During my internship at BleuAI, I developed federated learning pipelines on FHIR clinical records. My project "Dermaloop" has sharpened my ability to design AI systems in safety-critical environments.<br><br>I am drawn to TU Munich because of <span class="hlp">Prof. Daniel Cremers</span>'s work in <span class="hlp">computer vision and 3D deep learning</span>. The <span class="hlg">TUM CDTM Honors Program</span>, emphasizing <span class="hlg">technology entrepreneurship</span>, provides exactly the foundation I seek.</div>
+            </div>
+          </div>
+          <div class="ai-swap-note"><i data-lucide="sparkles" width="11" height="11" style="color:var(--accent);flex-shrink:0"></i>AI substituted 2 professor names, 2 program descriptions, and 2 course emphases across both versions.<button class="btn-sm btn-out tsm" style="margin-left:auto" onclick="showDiffModal()">View Diff</button></div>
+        </div>
+      </div>
+
+      <!-- ── SCHOLARSHIPS ── -->
+      <div class="pv" id="pv-grants">
+        <div class="phead"><div class="ptitle">Micro-Scholarship Engine</div><div class="psub">AI-matched grants with auto-drafted 300-word applications.</div></div>
+        <div class="g3 mb14">
+          <div class="card cp" style="text-align:center"><div style="font-size:21px;font-weight:800;color:var(--green)">3,000 EUR</div><div class="txs t2">Total potential funding</div></div>
+          <div class="card cp" style="text-align:center"><div style="font-size:21px;font-weight:800;color:var(--accent)">4</div><div class="txs t2">Grants matched to profile</div></div>
+          <div class="card cp" style="text-align:center"><div style="font-size:21px;font-weight:800;color:var(--amber)">2</div><div class="txs t2">Applications AI-drafting</div></div>
+        </div>
+        <div class="kanban">
+          <div class="kc"><div class="kh"><span class="kct">Matched Grants</span><span class="kcnt">2</span></div>
+            <div class="kb kb-ac">
+              <div class="grant-card"><div class="gname">Health AI Innovator Grant</div><div class="gamt">1,000 EUR</div><div class="gdesc">For AI students with a healthcare research project. Reviews quarterly.</div><div class="mb8"><span class="sp sp-ac txs">94% match</span></div><button class="gen-btn" onclick="openGrantModal('Health AI Innovator Grant','Awarded to students demonstrating impactful AI research in healthcare. Priority given to projects with clinical validation.')"><i data-lucide="sparkles" width="10" height="10"></i> Generate Application</button></div>
+              <div class="grant-card"><div class="gname">AI for Good Foundation</div><div class="gamt">500 EUR</div><div class="gdesc">Social-impact AI projects in healthcare or education. Annual cycle.</div><div class="mb8"><span class="sp sp-g txs">87% match</span></div><button class="gen-btn" onclick="openGrantModal('AI for Good Foundation','Supports students whose research directly addresses real human problems through AI.')"><i data-lucide="sparkles" width="10" height="10"></i> Generate Application</button></div>
+            </div>
+          </div>
+          <div class="kc"><div class="kh"><span class="kct">AI Drafting</span><span class="kcnt">2</span></div>
+            <div class="kb kb-am">
+              <div class="grant-card"><div class="gname">Data Science Future Leaders</div><div class="gamt">500 EUR</div><div class="gdesc">For EU data science students applying to global MSc programs.</div><div class="mb8"><div style="font-size:10px;color:var(--t3);margin-bottom:3px;display:flex;justify-content:space-between"><span>Draft progress</span><span style="color:var(--amber)">68%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:68%"></div></div></div><button class="gen-btn" onclick="openGrantModal('Data Science Future Leaders','Supporting the next generation of data scientists across Europe with a focus on international academic excellence.')"><i data-lucide="sparkles" width="10" height="10"></i> Continue Draft</button></div>
+              <div class="grant-card"><div class="gname">European Women in Tech</div><div class="gamt">1,000 EUR</div><div class="gdesc">Female-identifying EU STEM students. Requires personal statement.</div><div class="mb8"><div style="font-size:10px;color:var(--t3);margin-bottom:3px;display:flex;justify-content:space-between"><span>Draft progress</span><span style="color:var(--amber)">41%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:41%"></div></div></div><button class="gen-btn" onclick="openGrantModal('European Women in Tech','Championing female-identifying STEM students pursuing graduate studies at leading European and international universities.')"><i data-lucide="sparkles" width="10" height="10"></i> Continue Draft</button></div>
+            </div>
+          </div>
+          <div class="kc"><div class="kh"><span class="kct">Ready to Submit</span><span class="kcnt">1</span></div>
+            <div class="kb kb-gr">
+              <div class="grant-card" style="border-color:var(--gb)"><div class="gname">Eiffel Excellence Scholarship</div><div class="gamt">1,181 EUR/mo</div><div class="gdesc">French government scholarship. AI review approved, application complete.</div><div class="mb8"><span class="sp sp-g txs">AI Verified</span></div><button class="sub-btn" onclick="submitScholarship(this)"><i data-lucide="send" width="10" height="10"></i> Submit Application</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── MOCK INTERVIEW ── -->
+      <div class="pv" id="pv-int">
+        <div class="phead"><div style="display:flex;align-items:center;gap:7px;margin-bottom:4px"><span class="ai-lbl"><i data-lucide="mic" width="9" height="9"></i> Voice-Enabled</span></div><div class="ptitle">AI Mock Interview Assessor</div><div class="psub">Simulated admissions interview with real-time AI feedback and coaching.</div></div>
+        <div class="g7030" style="align-items:start">
+          <div class="gst">
+            <div class="card cp">
+
+              <!-- START SCREEN -->
+              <div id="int-start">
+                <div class="int-start-wrap">
+                  <div class="int-orb-idle" onclick="beginInterview()">
+                    <i data-lucide="mic" width="34" height="34" style="color:var(--accent)"></i>
+                  </div>
+                  <div style="font-size:17px;font-weight:700;margin-bottom:6px">Ready to Practice?</div>
+                  <div class="tsm t2" style="max-width:320px;line-height:1.6;margin-bottom:16px">Simulated 30-minute admissions interview. AI evaluates your clarity, technical depth, and structure in real time.</div>
+                  <div class="tsm fw6 t2" style="margin-bottom:8px;align-self:flex-start">Select Interview Mode</div>
+                  <div class="int-mode-grid">
+                    <div class="int-mode-opt sel" id="mode-tech" onclick="selectMode(this,'tech')">
+                      <div class="int-mode-title">Technical Deep Dive</div>
+                      <div class="int-mode-sub">Project walk-throughs and methodology questions</div>
+                    </div>
+                    <div class="int-mode-opt" id="mode-mot" onclick="selectMode(this,'mot')">
+                      <div class="int-mode-title">Motivation and Fit</div>
+                      <div class="int-mode-sub">Why this program, future goals, research interests</div>
+                    </div>
+                    <div class="int-mode-opt" id="mode-mix" onclick="selectMode(this,'mix')">
+                      <div class="int-mode-title">Full Mix</div>
+                      <div class="int-mode-sub">Both technical and motivation questions</div>
+                    </div>
+                    <div class="int-mode-opt" id="mode-rapid" onclick="selectMode(this,'rapid')">
+                      <div class="int-mode-title">Rapid Fire</div>
+                      <div class="int-mode-sub">10 short questions, 2 minutes each</div>
+                    </div>
+                  </div>
+                  <div style="display:flex;justify-content:space-between;width:100%;margin-bottom:10px">
+                    <div class="tsm fw6 t2">Interview Voice</div>
+                    <select class="sel-ctrl" style="width:auto;padding:5px 10px;font-size:12px" id="int-voice-sel">
+                      <option>ETH Zurich Officer</option>
+                      <option>TU Munich Officer</option>
+                      <option>Imperial Officer</option>
+                      <option>EPFL Officer</option>
+                    </select>
+                  </div>
+                  <div style="display:flex;align-items:center;gap:7px;margin-bottom:18px;font-size:12.5px;color:var(--t2);background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:7px 12px;width:100%">
+                    <i data-lucide="languages" width="13" height="13" style="color:var(--green)"></i>
+                    French A1 Translation Support will be active during the session
+                  </div>
+                  <button class="btn-p" style="width:100%;justify-content:center;padding:12px" onclick="beginInterview()">
+                    <i data-lucide="play" width="14" height="14"></i> Start Interview Session
+                  </button>
+                </div>
+              </div>
+
+              <!-- LIVE SESSION -->
+              <div id="int-live" style="display:none">
+                <div class="int-orb-wrap">
+                  <div class="orb" id="int-orb"><div class="orb-ring"></div><i data-lucide="radio" width="28" height="28" style="color:var(--accent);opacity:.85"></i></div>
+                  <div class="live-lbl" id="int-lbl">LIVE - AI Admissions Officer - ETH Mode</div>
+                  <div class="int-q" id="int-q-text">"Can you walk me through your Dermaloop project and explain how the reinforcement learning controller works?"</div>
+                  <div class="waveform" id="int-wave">
+                    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+                    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+                    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+                  </div>
+                  <div class="int-ctrls">
+                    <button class="ctrl" id="int-pause-btn" onclick="toggleIntPause()" title="Pause"><i data-lucide="pause" width="13" height="13"></i></button>
+                    <button class="ctrl ctrl-main" id="int-mic-btn" onclick="toggleMic()" title="Speak"><i data-lucide="mic" width="16" height="16"></i></button>
+                    <button class="ctrl" onclick="skipQuestion()" title="Next question"><i data-lucide="skip-forward" width="13" height="13"></i></button>
+                    <button class="ctrl" style="color:var(--red);border-color:var(--rb)" onclick="endInterview()" title="End session"><i data-lucide="phone-off" width="13" height="13"></i></button>
+                  </div>
+                  <div style="margin-top:11px;display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--t2);background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:6px 10px">
+                    <i data-lucide="languages" width="12" height="12" style="color:var(--green)"></i>
+                    French A1 Translation Support - <strong style="color:var(--green)">Active</strong>
+                  </div>
+                </div>
+              </div>
+
+              <!-- ENDED SCREEN -->
+              <div id="int-ended" style="display:none">
+                <div class="int-ended-wrap">
+                  <i data-lucide="check-circle" width="40" height="40" style="color:var(--green);margin-bottom:14px"></i>
+                  <div style="font-size:17px;font-weight:700;margin-bottom:5px">Session Complete</div>
+                  <div class="tsm t2" style="margin-bottom:18px">You completed 3 of 8 questions. Great progress!</div>
+                  <div style="display:flex;gap:8px">
+                    <button class="btn-p" onclick="restartInterview()"><i data-lucide="refresh-cw" width="12" height="12"></i> New Session</button>
+                    <button class="btn-g" onclick="exportTranscript()"><i data-lucide="download" width="12" height="12"></i> Export Transcript</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Transcript (only shown when session active or ended) -->
+              <div id="int-transcript-wrap">
+                <div class="ch mt14" style="margin-bottom:9px"><div class="ct-row"><i data-lucide="message-square" width="13" height="13" style="color:var(--t3)"></i><span class="ct">Transcript</span></div><div style="display:flex;gap:7px"><span class="sp sp-gr txs" id="int-q-counter">Q 1 / 8</span><button class="btn-sm btn-out tsm" onclick="exportTranscript()"><i data-lucide="download" width="10" height="10"></i> Export</button></div></div>
+                <div id="int-transcript" style="background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-md);padding:12px;display:flex;flex-direction:column;gap:9px;max-height:220px;overflow-y:auto"></div>
+              </div>
+            </div>
+          </div>
+          <div class="gst">
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> Real-time</span><span class="ct">Session Metrics</span></div></div>
+              <div class="int-metric"><div class="im-score" style="color:var(--green)">85<span style="font-size:12px;font-weight:500;color:var(--t3)">%</span></div><div class="im-lbl">Speaking Clarity</div><div class="m-bar-bg"><div class="m-bar" style="width:85%;background:linear-gradient(90deg,#16a34a,var(--green))"></div></div></div>
+              <div class="int-metric"><div class="im-score" style="color:var(--accent)">92<span style="font-size:12px;font-weight:500;color:var(--t3)">%</span></div><div class="im-lbl">Technical Jargon Accuracy</div><div class="m-bar-bg"><div class="m-bar" style="width:92%;background:linear-gradient(90deg,var(--ah),var(--accent))"></div></div></div>
+              <div class="int-metric"><div class="im-score" style="color:var(--amber)">78<span style="font-size:12px;font-weight:500;color:var(--t3)">%</span></div><div class="im-lbl">Conciseness and Structure</div><div class="m-bar-bg"><div class="m-bar" style="width:78%;background:linear-gradient(90deg,#d97706,var(--amber))"></div></div></div>
+            </div>
+            <div class="card cp">
+              <div class="ct" style="margin-bottom:11px">AI Coaching</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:9px 11px"><div style="font-size:10px;font-weight:700;color:var(--green);margin-bottom:3px">STRENGTH</div><div class="tsm t2" style="line-height:1.5">Strong domain vocabulary - "viscoelastic", "hierarchical reward structure" signals depth.</div></div>
+                <div style="background:var(--ams);border:1px solid var(--amb);border-radius:var(--r-sm);padding:9px 11px"><div style="font-size:10px;font-weight:700;color:var(--amber);margin-bottom:3px">IMPROVE</div><div class="tsm t2" style="line-height:1.5">Answer was 12% longer than optimal. Use STAR method - limit Situation to 1 sentence.</div></div>
+                <div style="background:var(--as);border:1px solid var(--ab);border-radius:var(--r-sm);padding:9px 11px"><div style="font-size:10px;font-weight:700;color:var(--accent);margin-bottom:3px">NEXT QUESTION</div><div class="tsm t2" style="line-height:1.5">Preparing: "Why ETH Zurich specifically over other leading AI programs?"</div></div>
+              </div>
+            </div>
+            <div class="card cp">
+              <div style="display:flex;flex-direction:column;gap:7px">
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span class="t2">Duration</span><span class="fw6" id="int-duration">06:42 / 30:00</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span class="t2">Mode</span><span class="fw6">Technical Deep Dive</span></div>
+                <div style="display:flex;justify-content:space-between;font-size:12px"><span class="t2">French A1</span><span class="fw6" style="color:var(--green)">Active</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── PLANS AND PRICING ── -->
+      <div class="pv" id="pv-plans">
+        <div class="phead"><div class="ptitle">Plans and Pricing</div><div class="psub">You are currently on the Pro plan. Contact us to change your subscription.</div></div>
+        <div class="plans-grid">
+          <!-- Starter -->
+          <div class="plan-card">
+            <div class="plan-name">Starter</div>
+            <div class="plan-price">149<span> EUR/mo</span></div>
+            <div class="plan-tagline">Get started with guided program matching and a basic roadmap.</div>
+            <div class="plan-feats">
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Program shortlist - up to 5 schools</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Basic month-by-month roadmap</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Document vault - 3 documents</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>AI Advisor - 10 queries per month</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Email support - 48h response time</div>
+              <div class="pf no"><i data-lucide="x" width="13" height="13" style="flex-shrink:0"></i>CV and SOP Evaluator</div>
+              <div class="pf no"><i data-lucide="x" width="13" height="13" style="flex-shrink:0"></i>Portfolio Analyzer</div>
+              <div class="pf no"><i data-lucide="x" width="13" height="13" style="flex-shrink:0"></i>SOP Versioning</div>
+              <div class="pf no"><i data-lucide="x" width="13" height="13" style="flex-shrink:0"></i>Mock Interviews</div>
+              <div class="pf no"><i data-lucide="x" width="13" height="13" style="flex-shrink:0"></i>Scholarship Engine</div>
+            </div>
+            <button class="btn-sm btn-out w-full" style="justify-content:center" onclick="requestPlanChange('Starter','149')"><i data-lucide="arrow-down" width="11" height="11"></i> Downgrade to Starter</button>
+          </div>
+          <!-- Pro (current) -->
+          <div class="plan-card current">
+            <div class="plan-badge">Your current plan</div>
+            <div class="plan-name" style="color:var(--accent)">Pro</div>
+            <div class="plan-price" style="color:var(--accent)">299<span style="color:var(--t2)"> EUR/mo</span></div>
+            <div class="plan-tagline">The complete AI-powered admissions toolkit for serious applicants.</div>
+            <div class="plan-feats">
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Unlimited program shortlist</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Full month-by-month roadmap</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Document vault - unlimited</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>AI Advisor - unlimited</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>CV and SOP Evaluator</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Technical Portfolio Analyzer</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Adaptive SOP Versioning</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Mock Interviews - 3 per month</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Micro-Scholarship Engine</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Priority support - 24h response</div>
+            </div>
+            <button class="btn-sm w-full" style="justify-content:center;background:var(--sf3);border:1px solid var(--br);color:var(--t3);cursor:not-allowed" disabled>Current Plan</button>
+          </div>
+          <!-- Scholar -->
+          <div class="plan-card">
+            <div class="plan-name">Scholar</div>
+            <div class="plan-price">499<span> EUR/mo</span></div>
+            <div class="plan-tagline">Maximum support with human advisors and expert document review.</div>
+            <div class="plan-feats">
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Everything in Pro</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Unlimited mock interview sessions</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>2 human advisor consultations per month</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Expert application document review</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Dedicated success manager</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>WhatsApp priority support</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Early access to new features</div>
+              <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>University portal submission assistance</div>
+            </div>
+            <button class="btn-sm btn-acc w-full" style="justify-content:center" onclick="requestPlanChange('Scholar','499')"><i data-lucide="arrow-up" width="11" height="11"></i> Upgrade to Scholar</button>
+          </div>
+        </div>
+        <div style="margin-top:16px;padding:14px 18px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r-md);font-size:12.5px;color:var(--t2);line-height:1.6">
+          <strong style="color:var(--t1)">Billing questions?</strong> To change your plan or discuss custom options for institutions, contact us at <a href="mailto:billing@pathway.ai" style="color:var(--accent)">billing@pathway.ai</a>. All changes take effect at the next billing cycle.
+        </div>
+      </div>
+
+      <!-- ── PROFILE ── -->
+      <div class="pv" id="pv-profile">
+        <div class="phead"><div class="ptitle">My Profile</div><div class="psub">Manage your personal information and account settings.</div></div>
+        <div class="g2" style="align-items:start">
+          <div class="gst">
+            <!-- Personal Info -->
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="user" width="14" height="14" style="color:var(--accent)"></i><span class="ct">Personal Information</span></div><button class="btn-sm btn-out tsm" id="edit-btn" onclick="toggleEditProfile()">Edit</button></div>
+              <div class="profile-av-wrap">
+                <div class="profile-av" onclick="triggerUpload()">AZ<div class="av-edit-overlay"><i data-lucide="camera" width="16" height="16" style="color:white"></i></div></div>
+                <div style="margin-top:8px;font-size:12px;color:var(--t3)">Click to change photo</div>
+              </div>
+              <div class="g2" style="gap:10px">
+                <div class="field-grp"><div class="field-lbl">First Name</div><input class="field-inp" id="f-fname" value="Ahzam" disabled/></div>
+                <div class="field-grp"><div class="field-lbl">Last Name</div><input class="field-inp" id="f-lname" value="Afaq" disabled/></div>
+              </div>
+              <div class="field-grp"><div class="field-lbl">Email</div><input class="field-inp" id="f-email" value="ahzam.afaq@student.edu" disabled/></div>
+              <div class="field-grp"><div class="field-lbl">Location</div><input class="field-inp" id="f-loc" value="Paris, France" disabled/></div>
+              <div class="field-grp"><div class="field-lbl">Phone</div><input class="field-inp" id="f-phone" value="+33 6 12 34 56 78" disabled/></div>
+              <div id="save-btn-wrap" style="display:none">
+                <button class="btn-sm btn-acc" onclick="saveProfile()"><i data-lucide="save" width="11" height="11"></i> Save Changes</button>
+                <button class="btn-sm btn-out" style="margin-left:7px" onclick="cancelEditProfile()">Cancel</button>
+              </div>
+            </div>
+            <!-- Notification Settings -->
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="bell" width="14" height="14" style="color:var(--amber)"></i><span class="ct">Notifications</span></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">Deadline Reminders</div><div class="stg-sub">Get alerts 7 days before each deadline</div></div><div class="toggle-sw on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">AI Advisor Updates</div><div class="stg-sub">Notify when AI completes analysis</div></div><div class="toggle-sw on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">Scholarship Matches</div><div class="stg-sub">Alert when new grants match your profile</div></div><div class="toggle-sw on" onclick="this.classList.toggle('on')"></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">Weekly Progress Report</div><div class="stg-sub">Email summary every Sunday</div></div><div class="toggle-sw" onclick="this.classList.toggle('on')"></div></div>
+            </div>
+          </div>
+          <div class="gst">
+            <!-- Academic Info -->
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="graduation-cap" width="14" height="14" style="color:var(--accent)"></i><span class="ct">Academic Profile</span></div></div>
+              <div class="field-grp"><div class="field-lbl">Current Institution</div><div class="field-static">Universite Paris-Saclay</div></div>
+              <div class="field-grp"><div class="field-lbl">Current GPA</div><div class="field-static">16.25 / 20</div></div>
+              <div class="field-grp"><div class="field-lbl">Degree Level</div><div class="field-static">Master's leading to PhD</div></div>
+              <div class="field-grp"><div class="field-lbl">Target Entry</div><div class="field-static">Fall 2026</div></div>
+              <div class="field-grp"><div class="field-lbl">Target Major</div><div class="field-static">M.Sc. Artificial Intelligence / Data Science</div></div>
+              <div class="field-grp mb8"><div class="field-lbl">Languages</div></div>
+              <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <span class="sp sp-g txs">French - Native</span>
+                <span class="sp sp-ac txs">English - C1</span>
+                <span class="sp sp-gr txs">Arabic - A2</span>
+              </div>
+            </div>
+            <!-- Account -->
+            <div class="card cp">
+              <div class="ch"><div class="ct-row"><i data-lucide="settings" width="14" height="14" style="color:var(--t2)"></i><span class="ct">Account</span></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">Current Plan</div><div class="stg-sub">Pro - 299 EUR/mo</div></div><button class="btn-sm btn-out tsm" onclick="showPanel('plans',document.getElementById('sni-plans'))">Manage</button></div>
+              <div class="stg-item"><div><div class="stg-lbl">Member Since</div><div class="stg-sub">February 2026</div></div></div>
+              <div class="stg-item"><div><div class="stg-lbl">Data Export</div><div class="stg-sub">Download all your data as JSON</div></div><button class="btn-sm btn-out tsm" onclick="showToast('Data export requested. You will receive an email shortly.','success')"><i data-lucide="download" width="10" height="10"></i> Export</button></div>
+              <div class="stg-item" style="border:none"><div><div class="stg-lbl" style="color:var(--red)">Delete Account</div><div class="stg-sub">Permanently deletes all data</div></div><button class="btn-sm" style="font-size:12px;padding:7px 13px;background:var(--rs);color:var(--red);border:1px solid var(--rb)" onclick="confirmDelete()"><i data-lucide="trash-2" width="10" height="10"></i> Delete</button></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /dc -->
+  </div><!-- /dm -->
+</div><!-- /sc-dash -->
+
+<!-- ═══ MODALS ═══ -->
+<!-- Grant Modal -->
+<div class="mbk" id="grant-modal">
+  <div class="modal">
+    <div class="modal-hd">
+      <div><div style="margin-bottom:4px"><span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI Generating</span></div><div class="modal-title" id="gm-title">Grant Application</div></div>
+      <button class="icon-btn" onclick="closeModal('grant-modal')"><i data-lucide="x" width="13" height="13"></i></button>
+    </div>
+    <div class="modal-body" id="gm-body"><div style="display:flex;align-items:center;gap:8px;color:var(--accent)"><i data-lucide="loader" width="14" height="14" style="animation:spin 1s linear infinite"></i>Generating personalized 300-word application...</div></div>
+    <div class="modal-ft" id="gm-ft" style="display:none">
+      <button class="btn-sm btn-out" onclick="closeModal('grant-modal')">Close</button>
+      <button class="btn-sm btn-acc" onclick="copyGrantText()"><i data-lucide="copy" width="10" height="10"></i> Copy Text</button>
+      <button class="btn-sm btn-grn" onclick="saveGrantDraft()"><i data-lucide="save" width="10" height="10"></i> Save Draft</button>
+    </div>
+  </div>
+</div>
+<!-- Plan Change Modal -->
+<div class="mbk" id="plan-modal">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title" id="pm-title">Change Plan</div><button class="icon-btn" onclick="closeModal('plan-modal')"><i data-lucide="x" width="13" height="13"></i></button></div>
+    <div class="modal-body" id="pm-body"></div>
+    <div class="modal-ft">
+      <button class="btn-sm btn-out" onclick="closeModal('plan-modal')">Cancel</button>
+      <button class="btn-sm btn-acc" onclick="confirmPlanChange()">Request Change</button>
+    </div>
+  </div>
+</div>
+<!-- Doc View Modal -->
+<div class="mbk" id="doc-modal">
+  <div class="modal">
+    <div class="modal-hd"><div class="modal-title" id="dm-title">Document</div><button class="icon-btn" onclick="closeModal('doc-modal')"><i data-lucide="x" width="13" height="13"></i></button></div>
+    <div class="modal-body" id="dm-body"></div>
+    <div class="modal-ft">
+      <button class="btn-sm btn-out" onclick="closeModal('doc-modal')">Close</button>
+      <button class="btn-sm btn-acc" onclick="showToast('Download started','success')"><i data-lucide="download" width="10" height="10"></i> Download</button>
+    </div>
+  </div>
+</div>
+<!-- Diff Modal -->
+<div class="mbk" id="diff-modal">
+  <div class="modal" style="width:560px;">
+    <div class="modal-hd"><div class="modal-title">SOP Diff - AI Changes</div><button class="icon-btn" onclick="closeModal('diff-modal')"><i data-lucide="x" width="13" height="13"></i></button></div>
+    <div class="modal-body">
+      <div style="font-size:12.5px;line-height:1.7;color:var(--t2)">
+        <div style="margin-bottom:10px;font-weight:600;color:var(--t1)">Changes applied for ETH Zurich:</div>
+        <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-family:monospace;font-size:12px"><span style="color:var(--red)">- [UNIVERSITY]</span> <span style="color:var(--green)">+ ETH Zurich</span></div>
+        <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-family:monospace;font-size:12px"><span style="color:var(--red)">- [PROGRAM]</span> <span style="color:var(--green)">+ Data Science</span></div>
+        <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-family:monospace;font-size:12px"><span style="color:var(--red)">- [PROFESSOR NAME]</span> <span style="color:var(--green)">+ Prof. Ce Zhang</span></div>
+        <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:8px 11px;margin-bottom:7px;font-family:monospace;font-size:12px"><span style="color:var(--red)">- [RESEARCH AREA]</span> <span style="color:var(--green)">+ scalable machine learning and data management</span></div>
+        <div style="background:var(--gs);border:1px solid var(--gb);border-radius:var(--r-sm);padding:8px 11px;font-family:monospace;font-size:12px"><span style="color:var(--red)">- [KEY TOPIC]</span> <span style="color:var(--green)">+ responsible AI development</span></div>
+      </div>
+    </div>
+    <div class="modal-ft"><button class="btn-sm btn-out" onclick="closeModal('diff-modal')">Close</button></div>
+  </div>
+</div>
+
+
+
+<script>
+// ═══════════════════ STATE ═══════════════════
+const S = {
+  screen: 'onboard',
+  panel: 'overview',
+  history: [],
+  theme: 'dark',
+  intPaused: false,
+  intMicOn: false,
+  intEnded: false,
+  intQ: 2,
+  applications: [
+    {school:'ETH Zurich',prog:'M.Sc. Data Science',badge:'eth',status:'Drafting',progress:62,deadline:'June 1, 2026'},
+    {school:'TU Munich',prog:'M.Sc. Informatics',badge:'tum',status:'Submitted',progress:100,deadline:'Submitted'}
+  ],
+  editingProfile: false,
+  pendingPlan: null,
+  grantText: ''
+};
+const QUESTIONS = [
+  "Can you walk me through your Dermaloop project and explain how the reinforcement learning controller works?",
+  "Why ETH Zurich specifically over other leading AI programs in Europe?",
+  "Describe how your BleuAI internship shaped your research interests.",
+  "What is your long-term research vision beyond the master's program?",
+  "How do you handle ambiguity and uncertainty in a research project?",
+  "Tell me about a time you had to learn a completely new technical area quickly.",
+  "How would you contribute to the ETH Zurich research community?",
+  "What are the biggest open problems in healthcare AI that you want to solve?"
+];
+
+// ═══════════════════ THEME ═══════════════════
+function setTheme(t){
+  document.documentElement.setAttribute('data-theme',t);
+  S.theme=t;
+  ['btn-dark','btn-light','sb-btn-dark','sb-btn-light'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.classList.toggle('active', (t==='dark'&&id.includes('dark'))||(t==='light'&&id.includes('light')));
+  });
+}
+
+// ═══════════════════ NAVIGATION ═══════════════════
+function goTo(screen, addToHistory=true){
+  if(addToHistory && S.screen!==screen) S.history.push({type:'screen',val:S.screen});
+  const screens={onboard:'sc-onboard',matches:'sc-matches',dashboard:'sc-dash'};
+  Object.values(screens).forEach(id=>{ const el=document.getElementById(id); if(el)el.classList.remove('active'); });
+  S.screen=screen;
+  const screenMap={onboard:'sc-onboard',matches:'sc-matches',dashboard:'sc-dash'};
+  const el=document.getElementById(screenMap[screen]);
+  if(el)el.classList.add('active');
+  const fnav=document.getElementById('fnav');
+  fnav.style.display = screen==='dashboard' ? 'none' : 'flex';
+  updateBackBtn();
+  if(screen==='dashboard') renderTracker();
+  lucide.createIcons();
+}
+function goHome(){ goTo('onboard'); }
+function navBack(){
+  if(S.history.length===0)return;
+  const last=S.history.pop();
+  if(last.type==='screen') goTo(last.val,false);
+  else if(last.type==='panel'){ showPanel(last.val, document.getElementById('sni-'+last.val), false); }
+  updateBackBtn();
+}
+function updateBackBtn(){
+  const btn=document.getElementById('back-btn');
+  if(btn) btn.classList.toggle('visible', S.history.length>0 && S.screen!=='dashboard');
+}
+function showPanel(name, navEl, addToHistory=true){
+  if(addToHistory && S.panel!==name) S.history.push({type:'panel',val:S.panel});
+  const panelIds=['overview','docs','tracker','eval','port','sop','grants','int','plans','profile'];
+  panelIds.forEach(p=>{ const el=document.getElementById('pv-'+p); if(el)el.classList.remove('ac'); });
+  const target=document.getElementById('pv-'+name);
+  if(target)target.classList.add('ac');
+  document.querySelectorAll('.ni').forEach(n=>n.classList.remove('ac'));
+  if(navEl)navEl.classList.add('ac');
+  const titles={overview:'Dashboard',docs:'Document Vault',tracker:'Application Tracker',eval:'CV and SOP Evaluator',port:'Portfolio Analyzer',sop:'SOP Versioning',grants:'Scholarships',int:'Mock Interview',plans:'Plans and Pricing',profile:'My Profile'};
+  const t=document.getElementById('dtitle');
+  if(t&&titles[name])t.textContent=titles[name];
+  S.panel=name;
+  if(name==='tracker') renderTracker();
+  lucide.createIcons();
+}
+
+// ═══════════════════ TOAST ═══════════════════
+function showToast(msg,type='info'){
+  const wrap=document.getElementById('toast-wrap');
+  const t=document.createElement('div');
+  t.className=`toast toast-${type}`;
+  const icons={success:'check-circle',error:'x-circle',info:'info',warning:'alert-triangle'};
+  t.innerHTML=`<i data-lucide="${icons[type]||'info'}" width="14" height="14"></i>${msg}`;
+  wrap.appendChild(t);
+  lucide.createIcons();
+  setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(10px)'; t.style.transition='all .3s'; setTimeout(()=>t.remove(),300); },3000);
+}
+
+// ═══════════════════ NOTIFICATIONS ═══════════════════
+function toggleNotif(){
+  const drop=document.getElementById('notif-drop');
+  drop.classList.toggle('open');
+}
+function markAllRead(){
+  document.getElementById('notif-dot').style.display='none';
+  document.querySelectorAll('.ndot').forEach(d=>d.style.opacity='.3');
+  document.getElementById('notif-drop').classList.remove('open');
+  showToast('All notifications marked as read','success');
+}
+function handleNotif(n){
+  document.getElementById('notif-drop').classList.remove('open');
+  if(n===1){ goTo('dashboard'); showPanel('tracker',document.getElementById('sni-tracker')); }
+  else if(n===2){ goTo('dashboard'); showPanel('eval',document.getElementById('sni-eval')); }
+  else if(n===3){ goTo('dashboard'); showPanel('tracker',document.getElementById('sni-tracker')); }
+  else if(n===4){ goTo('dashboard'); showPanel('grants',document.getElementById('sni-grants')); }
+}
+document.addEventListener('click',e=>{ const drop=document.getElementById('notif-drop'); if(drop&&!drop.closest('.dtr')&&!e.target.closest('.dtr')) drop.classList.remove('open'); });
+
+// ═══════════════════ ONBOARDING ═══════════════════
+function toggleTag(el){ el.classList.toggle('sel'); }
+function selectRadio(el){ document.querySelectorAll('.r-opt').forEach(r=>r.classList.remove('sel')); el.classList.add('sel'); }
+function nextStep(){
+  document.getElementById('obs1').style.display='none';
+  const s2=document.getElementById('obs2'); s2.style.display='block'; s2.classList.add('fad');
+  document.getElementById('sd1').classList.remove('here'); document.getElementById('sd1').classList.add('done');
+  document.getElementById('sd2').classList.add('here');
+}
+function prevStep(){
+  document.getElementById('obs2').style.display='none';
+  document.getElementById('obs1').style.display='block';
+  document.getElementById('sd2').classList.remove('here'); document.getElementById('sd1').classList.remove('done');
+  document.getElementById('sd1').classList.add('here');
+}
+function discover(){
+  document.getElementById('sd2').classList.remove('here'); document.getElementById('sd2').classList.add('done');
+  document.getElementById('sd3').classList.add('here');
+  setTimeout(()=>goTo('matches'),100);
+}
+
+// ═══════════════════ MATCH CARDS ═══════════════════
+function toggleMC(id){ const c=document.getElementById(id); c.classList.toggle('open'); lucide.createIcons(); }
+function filterCountry(country,btn){
+  document.querySelectorAll('.flt-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const cards=document.querySelectorAll('.mc-card');
+  let visible=0;
+  cards.forEach(c=>{
+    const q=document.getElementById('uni-search').value.toLowerCase();
+    const nameMatch=!q||c.dataset.name.toLowerCase().includes(q);
+    const countryMatch=country==='all'||c.dataset.country===country;
+    const show=nameMatch&&countryMatch;
+    c.classList.toggle('hidden',!show);
+    if(show)visible++;
+  });
+  document.getElementById('results-count').textContent=`Showing ${visible} universit${visible===1?'y':'ies'}`;
+}
+function filterUnis(){
+  const q=document.getElementById('uni-search').value.toLowerCase();
+  const activeBtn=document.querySelector('.flt-btn.active');
+  const country=activeBtn?activeBtn.id.replace('flt-',''):'all';
+  const countryMap={'all':'all','ch':'Switzerland','de':'Germany','uk':'UK','nl':'Netherlands','sc':'Scandinavia'};
+  const c=countryMap[country]||'all';
+  let visible=0;
+  document.querySelectorAll('.mc-card').forEach(card=>{
+    const nm=!q||card.dataset.name.toLowerCase().includes(q);
+    const cm=c==='all'||card.dataset.country===c;
+    card.classList.toggle('hidden',!(nm&&cm));
+    if(nm&&cm)visible++;
+  });
+  document.getElementById('results-count').textContent=`Showing ${visible} universit${visible===1?'y':'ies'}`;
+}
+
+// ═══════════════════ ADD TO TRACKER ═══════════════════
+function addToTracker(school,prog,badge){
+  const exists=S.applications.find(a=>a.school===school);
+  if(exists){ showToast(`${school} is already in your tracker`,'warning'); return; }
+  S.applications.push({school,prog,badge,status:'Not Started',progress:0,deadline:'TBD'});
+  showToast(`${school} added to your applications!`,'success');
+  renderTracker();
+}
+function renderTracker(){
+  const html=S.applications.map(a=>{
+    const isSubmitted=a.status==='Submitted';
+    const pillClass=isSubmitted?'sp-g':a.progress>0?'sp-a':'sp-gr';
+    const barClass=isSubmitted?'pb-g':a.progress>50?'pb-a':'pb-ac';
+    return `<div class="tkr-item">
+      <div class="sbadge b-${a.badge}" style="width:30px;height:30px;font-size:9px;flex-shrink:0">${a.badge.toUpperCase().slice(0,3)}</div>
+      <div style="flex:1;min-width:0"><div class="tsm fw6">${a.school}</div><div class="txs t2">${a.prog}</div></div>
+      <div class="tkr-bw"><div class="pb-bg"><div class="pb ${barClass}" style="width:${a.progress}%"></div></div></div>
+      <span class="txs fw6">${a.progress}%</span>
+      <span class="sp ${pillClass} txs">${a.status}</span>
+    </div>`;
+  }).join('');
+  const ol=document.getElementById('ov-tracker-list'); if(ol)ol.innerHTML=html;
+  const tc=document.getElementById('tracker-cards');
+  if(tc) tc.innerHTML=S.applications.map(a=>`<div class="tr-card">
+    <div class="tr-h"><div class="sbadge b-${a.badge}" style="flex-shrink:0">${a.badge.toUpperCase().slice(0,3)}</div>
+    <div style="flex:1"><div class="tsm fw7">${a.school} - ${a.prog}</div><div class="txs t2">Deadline: ${a.deadline}</div></div>
+    <span class="sp ${a.status==='Submitted'?'sp-g':a.progress>0?'sp-a':'sp-gr'}">${a.status}</span></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><div class="pb-bg" style="flex:1"><div class="pb ${a.status==='Submitted'?'pb-g':'pb-a'}" style="width:${a.progress}%"></div></div><span class="txs fw7">${a.progress}%</span></div>
+    <div class="tsm t2">${a.status==='Submitted'?'All documents submitted. Awaiting review.':a.progress===0?'Click "Add to Applications" to begin tracking.':'Application in progress.'}</div>
+  </div>`).join('');
+  lucide.createIcons();
+}
+
+// ═══════════════════ FILE UPLOAD ═══════════════════
+function triggerUpload(){
+  const inp=document.getElementById('file-inp');
+  inp.onchange=e=>{ if(e.target.files.length>0){ const f=e.target.files[0]; addDocToVault(f.name); inp.value=''; } };
+  inp.click();
+}
+function triggerEvalUpload(){ document.getElementById('eval-file-inp').click(); }
+function evalFileSelected(inp){
+  if(!inp.files.length)return;
+  const f=inp.files[0]; const dz=document.getElementById('eval-dz');
+  dz.classList.add('loaded');
+  dz.innerHTML=`<div style="display:flex;justify-content:center;color:var(--green)"><i data-lucide="file-check" width="28" height="28"></i></div><div class="dz-title">${f.name}</div><div class="dz-sub">Click to replace - ${(f.size/1024).toFixed(0)}KB</div>`;
+  lucide.createIcons(); showToast(`${f.name} ready for evaluation`,'success');
+  inp.value='';
+}
+function addDocToVault(name){
+  const grid=document.getElementById('doc-grid'); if(!grid)return;
+  const addTile=grid.querySelector('.add-t');
+  const tile=document.createElement('div');
+  tile.className='doc-tile'; tile.dataset.status='ready';
+  tile.innerHTML=`<button class="doc-del" onclick="deleteDoc(this.parentElement,'${name}')"><i data-lucide="x" width="10" height="10"></i></button><div onclick="viewDoc('${name}')"><i data-lucide="file" width="22" height="22" style="color:var(--accent)"></i><div class="doc-title">${name}</div><div class="doc-meta">Just uploaded</div><span class="sp sp-g txs">Ready</span></div>`;
+  grid.insertBefore(tile,addTile);
+  lucide.createIcons(); showToast(`${name} uploaded successfully`,'success');
+}
+function dzDragOver(e,id){ e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
+function dzDragLeave(e,id){ document.getElementById(id).classList.remove('drag-over'); }
+function dzDrop(e,id){ e.preventDefault(); document.getElementById(id).classList.remove('drag-over'); const files=e.dataTransfer.files; if(files.length>0) addDocToVault(files[0].name); }
+
+// ═══════════════════ DOCUMENT VAULT FILTER + DELETE ═══════════════════
+function filterDocs(type,btn){
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('ac')); btn.classList.add('ac');
+  document.querySelectorAll('#doc-grid .doc-tile').forEach(t=>{ t.style.display=(type==='all'||t.dataset.status===type||t.dataset.status==='add')?'':'none'; });
+}
+function deleteDoc(tile,name){
+  if(!confirm(`Delete "${name}"? This cannot be undone.`)) return;
+  tile.style.transition='all .25s'; tile.style.opacity='0'; tile.style.transform='scale(.9)';
+  setTimeout(()=>tile.remove(),260);
+  showToast(`"${name}" deleted`,'success');
+}
+function viewDoc(name){
+  document.getElementById('dm-title').textContent=name;
+  document.getElementById('dm-body').innerHTML=`<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:8px;padding:12px;background:var(--sf2);border:1px solid var(--br);border-radius:var(--r-sm)"><i data-lucide="file" width="20" height="20" style="color:var(--accent)"></i><div><div class="fw6">${name}</div><div class="txs t3">PDF Document</div></div></div><div class="tsm t2" style="line-height:1.6">This document has been uploaded and verified by PathWay's AI document processor. It is ready to be submitted with your applications.</div></div>`;
+  document.getElementById('doc-modal').classList.add('open'); lucide.createIcons();
+}
+
+// ═══════════════════ DEADLINE TOGGLE ═══════════════════
+function toggleDeadlineDone(el){ el.classList.toggle('done-item'); if(el.classList.contains('done-item'))showToast('Task marked as complete','success'); }
+
+// ═══════════════════ EVALUATOR ═══════════════════
+function runEval(){
+  const dz=document.getElementById('eval-dz');
+  if(!dz.classList.contains('loaded')){ showToast('Please upload a document first','warning'); return; }
+  const btn=document.getElementById('eval-btn-txt'); btn.textContent='Analyzing...';
+  document.querySelector('#pv-eval .btn-p').disabled=true;
+  const col=document.getElementById('eval-result-col'); col.style.opacity='.4'; col.style.pointerEvents='none';
+  const prog=document.getElementById('eval-prog');
+  const school=prog.value.split(' ')[0] + ' ' + prog.value.split(' ')[1];
+  setTimeout(()=>{
+    col.style.opacity='1'; col.style.pointerEvents='auto';
+    btn.textContent='Run AI Evaluation';
+    document.querySelector('#pv-eval .btn-p').disabled=false;
+    document.getElementById('eval-school-tag').textContent=school;
+    const score=Math.floor(75+Math.random()*20);
+    document.getElementById('eval-score-num').textContent=score;
+    document.getElementById('eval-score-bar').style.width=score+'%';
+    showToast(`AI Evaluation complete - Score: ${score}/100`,'success');
+    lucide.createIcons();
+  },1800);
+}
+
+// ═══════════════════ PORTFOLIO ═══════════════════
+function regenBullet(id,originalText){
+  const el=document.getElementById(id); el.textContent='Regenerating...'; el.style.opacity='.5';
+  const alternatives=['Built a skin digital twin system using PyTorch RL and COMSOL microfluidics, demonstrating 94% accuracy across 12 bio-signal categories in real-time inference.','Architected an AI-driven physiological monitoring platform for skin tissue cultures integrating RL controllers with microfluidic hardware, reducing simulation error by 31%.'];
+  setTimeout(()=>{ el.textContent=alternatives[Math.floor(Math.random()*alternatives.length)]; el.style.opacity='1'; showToast('CV bullet regenerated','success'); },1000);
+}
+function copyText(text){
+  if(navigator.clipboard){ navigator.clipboard.writeText(text).then(()=>showToast('Copied to clipboard','success')).catch(()=>showToast('Copy failed','error')); }
+  else{ const ta=document.createElement('textarea'); ta.value=text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); showToast('Copied to clipboard','success'); }
+}
+
+// ═══════════════════ SOP ═══════════════════
+function updateWordCount(el){ const words=el.value.trim().split(/\s+/).filter(Boolean).length; document.getElementById('sop-word-count').textContent=words+' words'; }
+function syncSOPVersions(){
+  const master=document.getElementById('master-sop').value;
+  const ethBody=document.querySelector('#pv-sop .sop-ver:nth-child(1) .sop-vb');
+  const tumBody=document.querySelector('#pv-sop .sop-ver:nth-child(2) .sop-vb');
+  if(ethBody){
+    const ethAdapted=master
+      .replace(/\[UNIVERSITY\]/g,'<span class="hlg">ETH Zurich</span>')
+      .replace(/\[PROGRAM\]/g,'<span class="hlg">Data Science</span>')
+      .replace(/\[PROFESSOR NAME\]/g,'<span class="hlp">Prof. Ce Zhang</span>')
+      .replace(/\[RESEARCH AREA\]/g,'<span class="hlp">scalable machine learning and data management</span>')
+      .replace(/\[KEY TOPIC\]/g,'<span class="hlg">responsible AI</span>')
+      .replace(/\n/g,'<br>');
+    ethBody.innerHTML=ethAdapted;
+  }
+  if(tumBody){
+    const tumAdapted=master
+      .replace(/\[UNIVERSITY\]/g,'<span class="hlg">TU Munich</span>')
+      .replace(/\[PROGRAM\]/g,'<span class="hlg">Informatics (AI Track)</span>')
+      .replace(/\[PROFESSOR NAME\]/g,'<span class="hlp">Prof. Daniel Cremers</span>')
+      .replace(/\[RESEARCH AREA\]/g,'<span class="hlp">computer vision and 3D deep learning</span>')
+      .replace(/\[KEY TOPIC\]/g,'<span class="hlg">technology entrepreneurship</span>')
+      .replace(/\n/g,'<br>');
+    tumBody.innerHTML=tumAdapted;
+  }
+  showToast('University versions updated from master SOP','success');
+}
+function aiImproveSOP(){
+  const ta=document.getElementById('master-sop');
+  const btn=document.querySelector('#pv-sop .btn-acc[onclick*="aiImproveSOP"]')||document.querySelector('#pv-sop button[onclick*="aiImproveSOP"]');
+  const originalBtnHTML=btn?btn.innerHTML:'';
+  if(btn){ btn.disabled=true; btn.innerHTML='<i data-lucide="loader" width="10" height="10" style="animation:spin 1s linear infinite"></i> Analyzing...'; lucide.createIcons(); }
+  showToast('AI is analyzing your SOP - please wait...','info');
+  const IMPROVED_SOP=`My name is Ahzam Afaq, and I am applying for the Master's in [PROGRAM] at [UNIVERSITY]. Throughout my undergraduate journey - graduating with a 16.25/20 GPA - I have pursued a focused research trajectory at the intersection of artificial intelligence and biomedical systems, driven by the conviction that the most impactful AI operates at the boundary of human health and computational rigor.
+
+During my internship at BleuAI, I designed and deployed federated learning pipelines operating on FHIR-compliant clinical records across distributed hospital networks. This work reduced patient re-admission prediction error by 18% while maintaining full GDPR compliance - an experience that taught me that responsible AI architecture is not a constraint but a competitive advantage. Concurrently, my independent research project Dermaloop produced a digital twin of human skin using reinforcement learning controllers integrated with microfluidic simulations. Achieving 94% bio-signal classification accuracy across 12 physiological categories, this project sharpened my ability to design robust AI systems in safety-critical, high-stakes environments.
+
+I am drawn to [UNIVERSITY] specifically because of [PROFESSOR NAME]'s pioneering work in [RESEARCH AREA], which directly extends my current research trajectory. The [PROGRAM] curriculum's emphasis on [KEY TOPIC] represents exactly the theoretical foundation I need to transition from applied AI engineering to original research contributions. I am committed to producing work that advances the field and to contributing actively to the [UNIVERSITY] research community through collaboration, publication, and mentorship.`;
+  setTimeout(()=>{
+    ta.value=IMPROVED_SOP;
+    updateWordCount(ta);
+    if(btn){ btn.disabled=false; btn.innerHTML=originalBtnHTML; lucide.createIcons(); }
+    showToast('SOP improved by AI - review the changes and click Sync Versions','success');
+    // Auto-sync versions so university panels update immediately
+    syncSOPVersions();
+  },2100);
+}
+function showDiffModal(){ document.getElementById('diff-modal').classList.add('open'); lucide.createIcons(); }
+
+// ═══════════════════ SCHOLARSHIPS ═══════════════════
+const GRANT_TEXTS = {
+  'Health AI Innovator Grant':`As a French-based AI researcher with a 16.25/20 GPA and direct healthcare AI experience, I represent the precise profile this grant supports. My BleuAI internship produced federated NLP pipelines on FHIR clinical records, reducing re-admission prediction error by 18% under full GDPR compliance. My Dermaloop project demonstrates AI design in safety-critical biological contexts, achieving 94% bio-signal accuracy. Pursuing my M.Sc. in Data Science at ETH Zurich is the natural next step - this grant would allow me to focus entirely on research under Prof. Ce Zhang's group rather than financial logistics, contributing AI systems that improve real human outcomes.`,
+  'AI for Good Foundation':`Data science is my lens for understanding complex human systems. At BleuAI I built NLP pipelines that transformed unstructured clinical records into predictive models, directly impacting patient care. Dermaloop applied reinforcement learning to simulate human skin physiology, pushing data science into new scientific frontiers. I am applying to ETH Zurich to deepen theoretical foundations and conduct research that matters. This grant signals community investment in socially-grounded AI - I believe the most impactful AI is designed from day one with ethical constraints baked into every architectural decision.`,
+  'Data Science Future Leaders':`Data science is reshaping what is possible in biological research, clinical care, and environmental monitoring. At BleuAI, I built federated learning pipelines for healthcare. My Dermaloop project applied reinforcement learning to simulate human skin physiology. Both projects required ML expertise, domain knowledge, ethical awareness, and systems-level thinking. I am applying to ETH Zurich and TU Munich to formalize this expertise. This grant would reduce financial pressure and allow full research engagement. I intend to contribute to open-source tooling and mentor European students navigating the same path.`,
+  'European Women in Tech':`Being a woman in AI means inhabiting a field actively reshaping itself - and I intend to shape it. My 16.25/20 GPA reflects discipline and rigor, but my work at BleuAI and Dermaloop reflects conviction: AI systems should be built with the people they serve in mind. This grant would support my first year at ETH Zurich, removing the financial constraint that forces capable students toward misaligned career paths. I am committed to becoming a technical leader who creates space for the next generation of European women in AI through open-source contributions, mentorship, and research that matters.`
+};
+let currentGrantText='';
+function openGrantModal(name,context){
+  document.getElementById('gm-title').textContent=name;
+  document.getElementById('gm-body').innerHTML=`<div style="display:flex;align-items:center;gap:8px;color:var(--accent)"><i data-lucide="loader" width="14" height="14" style="animation:spin 1s linear infinite"></i>Generating personalized 300-word application...</div>`;
+  document.getElementById('gm-ft').style.display='none';
+  document.getElementById('grant-modal').classList.add('open'); lucide.createIcons();
+  setTimeout(()=>{
+    const text=GRANT_TEXTS[name]||'Application generated successfully.';
+    currentGrantText=text;
+    document.getElementById('gm-body').innerHTML=`<div style="white-space:pre-line;line-height:1.7;font-size:13px;color:var(--t2)">${text}</div>`;
+    document.getElementById('gm-ft').style.display='flex'; lucide.createIcons();
+  },1800);
+}
+function copyGrantText(){ copyText(currentGrantText); }
+function saveGrantDraft(){ showToast('Draft saved to your documents','success'); closeModal('grant-modal'); }
+function submitScholarship(btn){ if(confirm('Submit the Eiffel Excellence Scholarship application?')){ btn.innerHTML='<i data-lucide="check" width="10" height="10"></i> Submitted'; btn.className='sub-btn'; btn.disabled=true; showToast('Application submitted!','success'); lucide.createIcons(); } }
+
+// ═══════════════════ INTERVIEW ═══════════════════
+let intTimer=null; let intSeconds=0;
+let intSelectedMode='tech';
+function selectMode(el,mode){
+  document.querySelectorAll('.int-mode-opt').forEach(o=>o.classList.remove('sel'));
+  el.classList.add('sel'); intSelectedMode=mode;
+}
+function beginInterview(){
+  S.intEnded=false; S.intPaused=false; S.intMicOn=false; S.intQ=1; intSeconds=0;
+  document.getElementById('int-start').style.display='none';
+  document.getElementById('int-live').style.display='block';
+  document.getElementById('int-ended').style.display='none';
+  document.getElementById('int-transcript-wrap').style.display='block';
+  const voice=document.getElementById('int-voice-sel');
+  const school=voice?voice.value.split(' ')[0]:'ETH';
+  document.getElementById('int-lbl').textContent=`LIVE - ${voice?voice.value:'AI Admissions Officer'}`;
+  document.getElementById('int-q-text').textContent=`"${QUESTIONS[0]}"`;
+  document.getElementById('int-q-counter').textContent='Q 1 / 8';
+  document.getElementById('int-transcript').innerHTML=`<div class="int-q-item" style="border-color:var(--accent)"><div class="int-q-lbl" style="color:var(--accent)">AI OFFICER</div>${QUESTIONS[0]}</div>`;
+  const orb=document.getElementById('int-orb'), wave=document.getElementById('int-wave');
+  if(orb){ orb.classList.remove('ended','paused'); }
+  if(wave){ wave.classList.remove('ended','paused'); }
+  clearInterval(intTimer); startIntTimer();
+  showToast('Interview session started - good luck!','success');
+  lucide.createIcons();
+}
+function startIntTimer(){
+  intTimer=setInterval(()=>{
+    if(S.intPaused||S.intEnded) return;
+    intSeconds++;
+    const m=Math.floor(intSeconds/60), sec=intSeconds%60;
+    const el=document.getElementById('int-duration');
+    if(el) el.textContent=String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0')+' / 30:00';
+  },1000);
+}
+function toggleIntPause(){
+  S.intPaused=!S.intPaused;
+  const orb=document.getElementById('int-orb'), wave=document.getElementById('int-wave'), lbl=document.getElementById('int-lbl');
+  const btn=document.getElementById('int-pause-btn');
+  orb.classList.toggle('paused',S.intPaused); wave.classList.toggle('paused',S.intPaused);
+  if(S.intPaused){ lbl.textContent='PAUSED'; lbl.classList.add('paused'); btn.innerHTML='<i data-lucide="play" width="13" height="13"></i>'; showToast('Session paused','info'); }
+  else{ lbl.textContent='LIVE - AI Admissions Officer - ETH Mode'; lbl.classList.remove('paused'); btn.innerHTML='<i data-lucide="pause" width="13" height="13"></i>'; showToast('Session resumed','success'); }
+  lucide.createIcons();
+}
+function toggleMic(){
+  S.intMicOn=!S.intMicOn;
+  const btn=document.getElementById('int-mic-btn');
+  btn.classList.toggle('recording',S.intMicOn);
+  btn.innerHTML=`<i data-lucide="${S.intMicOn?'mic-off':'mic'}" width="16" height="16"></i>`;
+  showToast(S.intMicOn?'Microphone active - speak now':'Microphone muted','info');
+  lucide.createIcons();
+}
+function skipQuestion(){
+  S.intQ=Math.min(S.intQ+1,8);
+  document.getElementById('int-q-counter').textContent=`Q ${S.intQ} / 8`;
+  const qt=document.getElementById('int-q-text');
+  qt.textContent=`"${QUESTIONS[(S.intQ-1)%QUESTIONS.length]}"`;
+  // Add to transcript
+  const tr=document.getElementById('int-transcript');
+  const div=document.createElement('div');
+  div.className='int-q-item'; div.style.borderColor='var(--accent)';
+  div.innerHTML=`<div class="int-q-lbl" style="color:var(--accent)">AI OFFICER - Q${S.intQ}</div>${QUESTIONS[(S.intQ-1)%QUESTIONS.length]}`;
+  tr.appendChild(div); tr.scrollTop=tr.scrollHeight;
+  showToast('Next question','info'); lucide.createIcons();
+}
+function endInterview(){
+  if(!confirm('End the interview session?')) return;
+  S.intEnded=true;
+  document.getElementById('int-live').style.display='none';
+  document.getElementById('int-ended').style.display='block';
+  const orb=document.getElementById('int-orb'), wave=document.getElementById('int-wave');
+  if(orb)orb.classList.add('ended'); if(wave)wave.classList.add('ended');
+  showToast('Session ended - great job!','success');
+  clearInterval(intTimer); lucide.createIcons();
+}
+function restartInterview(){
+  // Go back to start screen for mode selection
+  document.getElementById('int-start').style.display='block';
+  document.getElementById('int-live').style.display='none';
+  document.getElementById('int-ended').style.display='none';
+  document.getElementById('int-transcript-wrap').style.display='none';
+  S.intEnded=false; S.intPaused=false; S.intMicOn=false;
+  clearInterval(intTimer);
+  const pauseBtn=document.getElementById('int-pause-btn');
+  if(pauseBtn) pauseBtn.innerHTML='<i data-lucide="pause" width="13" height="13"></i>';
+  const micBtn=document.getElementById('int-mic-btn');
+  if(micBtn){ micBtn.classList.remove('recording'); micBtn.innerHTML='<i data-lucide="mic" width="16" height="16"></i>'; }
+  showToast('Choose your mode and start a new session','info'); lucide.createIcons();
+}
+function exportTranscript(){
+  const lines=['PathWay AI Mock Interview Transcript','ETH Zurich Mode - Date: '+new Date().toLocaleDateString(),'','---','','AI OFFICER: Tell me about the most technically challenging aspect of Dermaloop.','AHZAM: Calibrating the RL controller for non-linear viscoelastic skin properties under varying hydration.','AI OFFICER: Can you walk me through your Dermaloop project and how the RL controller works?'];
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='PathWay_Interview_Transcript.txt'; a.click();
+  URL.revokeObjectURL(url); showToast('Transcript downloaded','success');
+}
+
+// ═══════════════════ PLANS ═══════════════════
+function requestPlanChange(plan,price){
+  document.getElementById('pm-title').textContent=`Change to ${plan} Plan`;
+  document.getElementById('pm-body').innerHTML=`<div style="line-height:1.7">You are requesting to ${price==='149'?'downgrade to':'upgrade to'} the <strong>${plan}</strong> plan at <strong>${price} EUR/mo</strong>.<br><br>This change will take effect at your next billing cycle (May 1, 2026). Your current features will remain active until then.<br><br>To confirm this change, click <strong>Request Change</strong> below. Our billing team will process it within 24 hours.</div>`;
+  S.pendingPlan=plan;
+  document.getElementById('plan-modal').classList.add('open'); lucide.createIcons();
+}
+function confirmPlanChange(){
+  closeModal('plan-modal');
+  showToast(`Plan change to ${S.pendingPlan} requested. Check your email for confirmation.`,'success');
+}
+
+// ═══════════════════ PROFILE ═══════════════════
+function toggleEditProfile(){
+  S.editingProfile=!S.editingProfile;
+  ['f-fname','f-lname','f-email','f-loc','f-phone'].forEach(id=>{ const el=document.getElementById(id); if(el)el.disabled=!S.editingProfile; });
+  document.getElementById('edit-btn').textContent=S.editingProfile?'Editing...':'Edit';
+  document.getElementById('save-btn-wrap').style.display=S.editingProfile?'block':'none';
+}
+function saveProfile(){
+  S.editingProfile=false;
+  ['f-fname','f-lname','f-email','f-loc','f-phone'].forEach(id=>{ const el=document.getElementById(id); if(el)el.disabled=true; });
+  document.getElementById('edit-btn').textContent='Edit';
+  document.getElementById('save-btn-wrap').style.display='none';
+  showToast('Profile saved successfully','success');
+  // Update sidebar name
+  const nm=document.getElementById('f-fname').value;
+  document.querySelector('.av-name').textContent=nm;
+}
+function cancelEditProfile(){
+  S.editingProfile=false;
+  ['f-fname','f-lname','f-email','f-loc','f-phone'].forEach(id=>{ const el=document.getElementById(id); if(el)el.disabled=true; });
+  document.getElementById('edit-btn').textContent='Edit';
+  document.getElementById('save-btn-wrap').style.display='none';
+}
+function confirmDelete(){
+  if(confirm('Are you sure you want to permanently delete your account? This cannot be undone.')){
+    if(confirm('This will delete ALL your applications, documents, and profile data. Continue?')){
+      showToast('Account deletion request submitted. You will receive a confirmation email.','error');
+    }
+  }
+}
+
+// ═══════════════════ MODAL HELPERS ═══════════════════
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mbk').forEach(m=>m.addEventListener('click',function(e){if(e.target===this)this.classList.remove('open');}));
+
+// ═══════════════════ PORTFOLIO ADD MODAL ═══════════════════
+function openAddPortfolioModal(){
+  document.getElementById('pm-title').textContent='Add Portfolio Entry';
+  document.getElementById('pm-body').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div><div class="field-lbl" style="margin-bottom:5px">Entry Type</div>
+        <select class="sel-ctrl" id="port-type">
+          <option value="project">Personal Project / Research</option>
+          <option value="internship">Internship</option>
+          <option value="publication">Publication or Paper</option>
+          <option value="course">Relevant Course or Certification</option>
+          <option value="award">Award or Hackathon</option>
+        </select>
+      </div>
+      <div><div class="field-lbl" style="margin-bottom:5px">Title</div><input class="field-inp" id="port-title" placeholder="e.g. Neural Image Segmentation" style="width:100%"/></div>
+      <div><div class="field-lbl" style="margin-bottom:5px">Description (max 250 chars)</div><textarea class="field-inp" id="port-desc" maxlength="250" rows="3" style="resize:none" placeholder="Brief description of what you built or learned..."></textarea></div>
+      <div><div class="field-lbl" style="margin-bottom:5px">Technologies / Skills</div><input class="field-inp" id="port-tech" placeholder="Python, PyTorch, FastAPI" style="width:100%"/></div>
+      <div><div class="field-lbl" style="margin-bottom:5px">GitHub or URL (optional)</div><input class="field-inp" id="port-url" placeholder="https://github.com/..." style="width:100%"/></div>
+    </div>`;
+  S.pendingPlan='portfolio';
+  document.getElementById('plan-modal').classList.add('open');
+  // Override confirm button
+  document.querySelector('#plan-modal .modal-ft .btn-acc').textContent='Add to Portfolio';
+  document.querySelector('#plan-modal .modal-ft .btn-acc').onclick=addPortfolioEntry;
+  lucide.createIcons();
+}
+function addPortfolioEntry(){
+  const title=document.getElementById('port-title')?.value?.trim();
+  if(!title){ showToast('Please enter a title','warning'); return; }
+  const t=document.getElementById('port-type')?.value||'project';
+  const desc=document.getElementById('port-desc')?.value?.trim()||'No description provided.';
+  const tech=document.getElementById('port-tech')?.value?.trim()||'';
+  const typeLabels={project:'Project',internship:'Internship',publication:'Publication',course:'Course',award:'Award'};
+  const repoList=document.querySelector('#pv-port .card.cp');
+  const newCard=document.createElement('div');
+  newCard.className='repo-card';
+  // Build card via DOM to avoid escaping issues
+  const headerDiv=document.createElement('div');
+  headerDiv.style.cssText='display:flex;align-items:center;justify-content:space-between;margin-bottom:4px';
+  const leftDiv=document.createElement('div');
+  leftDiv.style.cssText='display:flex;align-items:center;gap:7px';
+  leftDiv.innerHTML='<i data-lucide="folder-git-2" width="12" height="12" style="color:var(--accent)"></i>';
+  const nameSpan=document.createElement('span'); nameSpan.className='repo-name'; nameSpan.textContent=title; leftDiv.appendChild(nameSpan);
+  const typeSpan=document.createElement('span'); typeSpan.className='sp sp-gr txs'; typeSpan.textContent=typeLabels[t]||t; leftDiv.appendChild(typeSpan);
+  const remBtn=document.createElement('button'); remBtn.className='txs'; remBtn.style.cssText='color:var(--red);padding:2px 6px;border:1px solid var(--rb);border-radius:4px;background:var(--rs)'; remBtn.textContent='Remove';
+  remBtn.onclick=function(){ this.closest('.repo-card').remove(); showToast('Entry removed','success'); };
+  headerDiv.appendChild(leftDiv); headerDiv.appendChild(remBtn);
+  const descDiv=document.createElement('div'); descDiv.className='repo-desc'; descDiv.textContent=desc;
+  const aiBox=document.createElement('div'); aiBox.className='ai-gen-box';
+  const aiHd=document.createElement('div'); aiHd.className='ai-gen-hd'; aiHd.innerHTML='<span class="ai-lbl"><i data-lucide="sparkles" width="9" height="9"></i> AI-Generated CV Bullet</span>';
+  const gBtn=document.createElement('button'); gBtn.className='btn-sm btn-out'; gBtn.style.cssText='font-size:10px;padding:3px 8px'; gBtn.innerHTML='<i data-lucide="sparkles" width="9" height="9"></i> Generate';
+  const capturedTitle=title; const capturedDesc=desc;
+  gBtn.onclick=function(){ genBulletEntry(this, capturedTitle, capturedDesc); };
+  aiHd.appendChild(gBtn);
+  const aiBody=document.createElement('div'); aiBody.className='ai-gen-body'; aiBody.style.cssText='color:var(--t3);font-style:italic'; aiBody.textContent='Click Generate to create an AI CV bullet for this entry.';
+  aiBox.appendChild(aiHd); aiBox.appendChild(aiBody);
+  newCard.appendChild(headerDiv); newCard.appendChild(descDiv);
+  if(tech){ const tDiv=document.createElement('div'); tDiv.className='lang-tags'; tech.split(',').forEach(function(s){ const sp=document.createElement('span'); sp.className='ltag'; sp.textContent=s.trim(); tDiv.appendChild(sp); }); newCard.appendChild(tDiv); }
+  newCard.appendChild(aiBox);
+  const siblings=repoList.querySelectorAll('.repo-card');
+  const lastRepo=siblings[siblings.length-1];
+  if(lastRepo) lastRepo.after(newCard); else repoList.appendChild(newCard);
+  closeModal('plan-modal');
+  showToast(`"${title}" added to your portfolio`,'success');
+  // Reset button
+  const btn=document.querySelector('#plan-modal .modal-ft .btn-acc');
+  if(btn){btn.textContent='Request Change';btn.onclick=confirmPlanChange;}
+  lucide.createIcons();
+}
+function genBulletEntry(btn,ptitle,pdesc){
+  const box=btn.closest('.ai-gen-box').querySelector('.ai-gen-body');
+  box.textContent='Generating...'; box.style.opacity='.5';
+  setTimeout(function(){
+    box.textContent='Developed '+ptitle+': '+(pdesc.length>80?pdesc.slice(0,80)+'...':pdesc)+' - demonstrating applied ML research capability in a graduate admissions context.';
+    box.style.opacity='1'; box.style.fontStyle='normal';
+    showToast('CV bullet generated','success');
+  },1200);
+}
+function generateBulletForEntry(btn){ genBulletEntry(btn,'Project',''); }
+
+// ═══════════════════ INIT ═══════════════════
+lucide.createIcons();
+renderTracker();
+// Hide transcript wrap until interview starts
+const itw=document.getElementById('int-transcript-wrap'); if(itw)itw.style.display='none';
+</script>
+</body>
+</html>
