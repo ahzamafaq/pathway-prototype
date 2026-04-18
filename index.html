@@ -484,27 +484,29 @@ input,textarea,select{font-family:inherit}
 /* spin keyframe */
 @keyframes spin{to{transform:rotate(360deg)}}
 /* ════ Responsive Design ════ */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
   .mob-only { display: flex !important; }
-  .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; z-index: 9999; position: fixed; width: 280px; max-width: 85vw; }
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; z-index: 9999; position: fixed; width: 280px; max-width: 85vw; height: 100vh; top: 0; left: 0; }
   .sidebar.show { transform: translateX(0); }
-  .dm { margin-left: 0; padding-top: 52px; }
-  .dtbar { position: fixed; width: 100%; top: 0; padding: 0 14px; background: var(--sf); border-bottom: 1px solid var(--br); z-index: 50; }
-  .dc { padding: 15px; }
-  .sb-over { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; backdrop-filter: blur(2px); }
+  .dm { margin-left: 0 !important; width: 100vw; overflow-x: hidden; }
+  .dtbar { position: fixed; width: 100%; top: 0; left: 0; padding: 0 14px; background: var(--sf); border-bottom: 1px solid var(--br); z-index: 5000; box-sizing: border-box; }
+  .dc { padding: 65px 15px 15px 15px !important; }
+  .sb-over { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 9998; backdrop-filter: blur(2px); }
   .sb-over.show { display: block; }
-  .g2, .g3, .g7030, .doc-grid, .req-grid, .skill-grid, .sop-split, .kanban, .plans-grid, .int-mode-grid { grid-template-columns: 1fr; }
+  .g2, .g3, .g7030, .doc-grid, .req-grid, .skill-grid, .sop-split, .kanban, .plans-grid, .int-mode-grid { display: flex !important; flex-direction: column !important; }
   .modal { width: 95% !important; margin: 10px; max-height: 90vh; }
   .modal-body { padding: 15px; }
   .onboard-content { width: 100%; padding: 20px; }
   .hero h1 { font-size: 32px; }
   .steps { flex-direction: column; align-items: flex-start; gap: 8px; }
   .mc-card { padding: 15px; }
-  .stat-row { flex-direction: column; }
+  .stat-row { flex-direction: column !important; }
+  .stat-c { min-width: 100% !important; }
   .ai-eval-hdr { flex-direction: column; align-items: flex-start; gap: 10px; }
   .ai-score { margin-left: 0; }
   #pv-port .card.cp { padding: 15px; }
   .repo-card { padding: 12px; }
+  .notif-drop { right: 10px !important; left: 10px !important; width: auto !important; position: fixed !important; top: 60px !important; z-index: 5001 !important; }
 }
 .mob-only { display: none; }
 </style>
