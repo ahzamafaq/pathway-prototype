@@ -909,7 +909,7 @@ input,textarea,select{font-family:inherit}
     </nav>
     <div class="sb-ft">
       <div class="plan-chip" onclick="showPanel('plans',document.getElementById('sni-plans'))">
-        <div><div class="plan-lbl">Current plan</div><div class="plan-n">Pro - 299/mo</div></div>
+        <div><div class="plan-lbl">Current plan</div><div class="plan-n">Pro - 299/yr</div></div>
         <i data-lucide="chevron-right" width="12" height="12" style="color:var(--accent)"></i>
       </div>
     </div>
@@ -1333,7 +1333,7 @@ I am drawn to [UNIVERSITY] because of [PROFESSOR NAME]'s work in [RESEARCH AREA]
           <!-- Starter -->
           <div class="plan-card">
             <div class="plan-name">Starter</div>
-            <div class="plan-price">149<span> EUR/mo</span></div>
+            <div class="plan-price">149<span> EUR/yr</span></div>
             <div class="plan-tagline">Get started with guided program matching and a basic roadmap.</div>
             <div class="plan-feats">
               <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Program shortlist - up to 5 schools</div>
@@ -1353,7 +1353,7 @@ I am drawn to [UNIVERSITY] because of [PROFESSOR NAME]'s work in [RESEARCH AREA]
           <div class="plan-card current">
             <div class="plan-badge">Your current plan</div>
             <div class="plan-name" style="color:var(--accent)">Pro</div>
-            <div class="plan-price" style="color:var(--accent)">299<span style="color:var(--t2)"> EUR/mo</span></div>
+            <div class="plan-price" style="color:var(--accent)">299<span style="color:var(--t2)"> EUR/yr</span></div>
             <div class="plan-tagline">The complete AI-powered admissions toolkit for serious applicants.</div>
             <div class="plan-feats">
               <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Unlimited program shortlist</div>
@@ -1372,7 +1372,7 @@ I am drawn to [UNIVERSITY] because of [PROFESSOR NAME]'s work in [RESEARCH AREA]
           <!-- Scholar -->
           <div class="plan-card">
             <div class="plan-name">Scholar</div>
-            <div class="plan-price">499<span> EUR/mo</span></div>
+            <div class="plan-price">499<span> EUR/yr</span></div>
             <div class="plan-tagline">Maximum support with human advisors and expert document review.</div>
             <div class="plan-feats">
               <div class="pf yes"><i data-lucide="check" width="13" height="13" style="color:var(--green);flex-shrink:0"></i>Everything in Pro</div>
@@ -1444,7 +1444,7 @@ I am drawn to [UNIVERSITY] because of [PROFESSOR NAME]'s work in [RESEARCH AREA]
             <!-- Account -->
             <div class="card cp">
               <div class="ch"><div class="ct-row"><i data-lucide="settings" width="14" height="14" style="color:var(--t2)"></i><span class="ct">Account</span></div></div>
-              <div class="stg-item"><div><div class="stg-lbl">Current Plan</div><div class="stg-sub">Pro - 299 EUR/mo</div></div><button class="btn-sm btn-out tsm" onclick="showPanel('plans',document.getElementById('sni-plans'))">Manage</button></div>
+              <div class="stg-item"><div><div class="stg-lbl">Current Plan</div><div class="stg-sub">Pro - 299 EUR/yr</div></div><button class="btn-sm btn-out tsm" onclick="showPanel('plans',document.getElementById('sni-plans'))">Manage</button></div>
               <div class="stg-item"><div><div class="stg-lbl">Member Since</div><div class="stg-sub">February 2026</div></div></div>
               <div class="stg-item"><div><div class="stg-lbl">Data Export</div><div class="stg-sub">Download all your data as JSON</div></div><button class="btn-sm btn-out tsm" onclick="showToast('Data export requested. You will receive an email shortly.','success')"><i data-lucide="download" width="10" height="10"></i> Export</button></div>
               <div class="stg-item" style="border:none"><div><div class="stg-lbl" style="color:var(--red)">Delete Account</div><div class="stg-sub">Permanently deletes all data</div></div><button class="btn-sm" style="font-size:12px;padding:7px 13px;background:var(--rs);color:var(--red);border:1px solid var(--rb)" onclick="confirmDelete()"><i data-lucide="trash-2" width="10" height="10"></i> Delete</button></div>
@@ -1984,7 +1984,7 @@ function exportTranscript(){
 // ═══════════════════ PLANS ═══════════════════
 function requestPlanChange(plan,price){
   document.getElementById('pm-title').textContent=`Change to ${plan} Plan`;
-  document.getElementById('pm-body').innerHTML=`<div style="line-height:1.7">You are requesting to ${price==='149'?'downgrade to':'upgrade to'} the <strong>${plan}</strong> plan at <strong>${price} EUR/mo</strong>.<br><br>This change will take effect at your next billing cycle (May 1, 2026). Your current features will remain active until then.<br><br>To confirm this change, click <strong>Request Change</strong> below. Our billing team will process it within 24 hours.</div>`;
+  document.getElementById('pm-body').innerHTML=`<div style="line-height:1.7">You are requesting to ${price==='149'?'downgrade to':'upgrade to'} the <strong>${plan}</strong> plan at <strong>${price} EUR/yr</strong>.<br><br>This change will take effect at your next billing cycle (May 1, 2026). Your current features will remain active until then.<br><br>To confirm this change, click <strong>Request Change</strong> below. Our billing team will process it within 24 hours.</div>`;
   S.pendingPlan=plan;
   document.getElementById('plan-modal').classList.add('open'); lucide.createIcons();
 }
