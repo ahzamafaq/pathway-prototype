@@ -1013,7 +1013,7 @@ input,textarea,select{font-family:inherit}
         </div>
         <div class="notif-drop" id="notif-drop">
           <div class="notif-head"><span class="notif-title">Notifications</span><button class="tsm t2" onclick="markAllRead()" style="cursor:pointer">Mark all read</button></div>
-          <div class="notif-item" onclick="handleNotif(1)"><div class="ndot ndot-red"></div><div><div class="ntext"><strong>Urgent:</strong> Submit LOR from Prof. Adrian by March 26</div><div class="ndate">2 hours ago</div></div></div>
+          <div class="notif-item" onclick="handleNotif(1)"><div class="ndot ndot-red"></div><div><div class="ntext"><strong>Urgent:</strong> Submit LOR from Prof. Adrian by April 26</div><div class="ndate">2 hours ago</div></div></div>
           <div class="notif-item" onclick="handleNotif(2)"><div class="ndot ndot-amber"></div><div><div class="ntext">Your SOP Readiness Score is ready: 82/100</div><div class="ndate">1 day ago</div></div></div>
           <div class="notif-item" onclick="handleNotif(3)"><div class="ndot ndot-green"></div><div><div class="ntext">TU Munich application confirmed received</div><div class="ndate">2 days ago</div></div></div>
           <div class="notif-item" onclick="handleNotif(4)"><div class="ndot ndot-amber"></div><div><div class="ntext">New scholarship matched: Health AI Innovator Grant</div><div class="ndate">3 days ago</div></div></div>
@@ -1029,11 +1029,11 @@ input,textarea,select{font-family:inherit}
       <div class="pv ac" id="pv-overview">
         <div class="phead">
           <div class="ptitle">Good afternoon, Ahzam</div>
-          <div class="psub">You have 2 active applications and 1 urgent task.</div>
+          <div class="psub" id="dash-subtitle">You have 2 active applications and 1 urgent task.</div>
         </div>
         <div class="stat-row">
           <div class="stat-c"><div class="stat-lbl">Profile Score</div><div class="stat-val" style="color:var(--green)">87</div><div class="stat-sub">Out of 100</div></div>
-          <div class="stat-c"><div class="stat-lbl">Applications</div><div class="stat-val">2</div><div class="stat-sub">1 submitted, 1 drafting</div></div>
+          <div class="stat-c"><div class="stat-lbl">Applications</div><div class="stat-val" id="stat-app-count">2</div><div class="stat-sub" id="stat-app-sub">1 submitted, 1 drafting</div></div>
           <div class="stat-c"><div class="stat-lbl">Days to ETH Deadline</div><div class="stat-val" style="color:var(--amber)">44</div><div class="stat-sub">June 1, 2026</div></div>
           <div class="stat-c"><div class="stat-lbl">Scholarships Matched</div><div class="stat-val">4</div><div class="stat-sub">Up to 3,000 EUR potential</div></div>
         </div>
@@ -1045,7 +1045,7 @@ input,textarea,select{font-family:inherit}
             </div>
             <div class="card cp">
               <div class="ch"><div class="ct-row"><i data-lucide="calendar-clock" width="14" height="14" style="color:var(--amber)"></i><span class="ct">Upcoming Deadlines</span></div></div>
-              <div class="dl-item urgent" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-r"></div><div><div class="dl-text">Submit Letter of Recommendation from <strong>Prof. Adrian</strong></div><div class="dl-date">Deadline: March 26, 2026 - Urgent - Click to mark done</div></div></div>
+              <div class="dl-item urgent" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-r"></div><div><div class="dl-text">Submit Letter of Recommendation from <strong>Prof. Adrian</strong></div><div class="dl-date">Deadline: April 26, 2026 - Urgent - Click to mark done</div></div></div>
               <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Upload IELTS Score Report - ETH Zurich Portal</div><div class="dl-date">Due: May 10, 2026</div></div></div>
               <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Finalize Statement of Purpose for ETH Zurich</div><div class="dl-date">Due: May 15, 2026</div></div></div>
               <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-g"></div><div><div class="dl-text">TU Munich decision expected</div><div class="dl-date">Expected: July 2026</div></div></div>
@@ -1055,12 +1055,41 @@ input,textarea,select{font-family:inherit}
             <div class="card cp">
               <div class="ch"><div class="ct-row"><i data-lucide="bar-chart-2" width="14" height="14" style="color:var(--accent)"></i><span class="ct">Profile Strength</span></div><span class="sp sp-ac">87/100</span></div>
               <div style="display:flex;flex-direction:column;gap:10px">
-                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Academic Record</span><span class="txs fw6" style="color:var(--green)">97%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:97%"></div></div></div>
-                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Research and Portfolio</span><span class="txs fw6" style="color:var(--green)">91%</span></div><div class="pb-bg"><div class="pb pb-g" style="width:91%"></div></div></div>
-                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">SOP Quality</span><span class="txs fw6" style="color:var(--amber)">72%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:72%"></div></div></div>
-                <div><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span class="tsm t2">Language Tests</span><span class="txs fw6" style="color:var(--amber)">58%</span></div><div class="pb-bg"><div class="pb pb-a" style="width:58%"></div></div></div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                    <span class="tsm t2">Academic Record <span style="font-size:10px;color:var(--t3)">(30% weight)</span></span>
+                    <span class="txs fw6" style="color:var(--green)">97%</span>
+                  </div>
+                  <div class="pb-bg"><div class="pb pb-g" style="width:97%"></div></div>
+                  <div class="txs t3" style="margin-top:3px">GPA 16.25/20 — well above most university thresholds</div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                    <span class="tsm t2">Research &amp; Portfolio <span style="font-size:10px;color:var(--t3)">(25% weight)</span></span>
+                    <span class="txs fw6" style="color:var(--green)">91%</span>
+                  </div>
+                  <div class="pb-bg"><div class="pb pb-g" style="width:91%"></div></div>
+                  <div class="txs t3" style="margin-top:3px">BleuAI internship + Dermaloop project detected in portfolio</div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                    <span class="tsm t2">SOP Quality <span style="font-size:10px;color:var(--t3)">(25% weight)</span></span>
+                    <span class="txs fw6" style="color:var(--amber)">72%</span>
+                  </div>
+                  <div class="pb-bg"><div class="pb pb-a" style="width:72%"></div></div>
+                  <div class="txs t3" style="margin-top:3px">Draft detected — AI evaluation scored structure &amp; clarity</div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+                    <span class="tsm t2">Language Tests <span style="font-size:10px;color:var(--t3)">(20% weight)</span></span>
+                    <span class="txs fw6" style="color:var(--amber)">58%</span>
+                  </div>
+                  <div class="pb-bg"><div class="pb pb-a" style="width:58%"></div></div>
+                  <div class="txs t3" style="margin-top:3px">No IELTS/TOEFL score uploaded yet — this is the main gap</div>
+                </div>
               </div>
               <div class="div"></div>
+              <div style="font-size:11px;color:var(--t3);line-height:1.5;margin-bottom:4px"><strong style="color:var(--t2)">How is this calculated?</strong> Weighted average across 4 pillars: Academic Record (30%), Research &amp; Portfolio (25%), SOP Quality (25%), Language Tests (20%). Score = (0.97×30) + (0.91×25) + (0.72×25) + (0.58×20) = <strong style="color:var(--t1)">87/100</strong></div>
               <div class="tsm t2" style="line-height:1.5">Upload your IELTS score to push your profile to <strong style="color:var(--t1)">94+</strong></div>
             </div>
             <div class="card cp">
@@ -1927,6 +1956,23 @@ function renderTracker(){
     <div class="tsm t2">${a.status==='Submitted'?'All documents submitted. Awaiting review.':a.progress===0?'Click "Add to Applications" to begin tracking.':'Application in progress.'}</div>
   </div>`).join('');
   lucide.createIcons();
+  // ── Dynamic application count update ──
+  const total = S.applications.length;
+  const submitted = S.applications.filter(a=>a.status==='Submitted').length;
+  const drafting  = S.applications.filter(a=>a.progress>0 && a.status!=='Submitted').length;
+  const notStarted = total - submitted - drafting;
+  const countEl = document.getElementById('stat-app-count');
+  const subEl   = document.getElementById('stat-app-sub');
+  const titleSub = document.getElementById('dash-subtitle');
+  if(countEl) countEl.textContent = total;
+  if(subEl){
+    const parts=[];
+    if(submitted>0) parts.push(submitted+' submitted');
+    if(drafting>0)  parts.push(drafting+' drafting');
+    if(notStarted>0) parts.push(notStarted+' not started');
+    subEl.textContent = parts.join(', ') || 'No applications yet';
+  }
+  if(titleSub) titleSub.textContent = `You have ${total} active application${total!==1?'s':''} and 1 urgent task.`;
 }
 
 // ═══════════════════ FILE UPLOAD ═══════════════════
