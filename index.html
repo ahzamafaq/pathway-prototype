@@ -1045,10 +1045,10 @@ input,textarea,select{font-family:inherit}
             </div>
             <div class="card cp">
               <div class="ch"><div class="ct-row"><i data-lucide="calendar-clock" width="14" height="14" style="color:var(--amber)"></i><span class="ct">Upcoming Deadlines</span></div></div>
-              <div class="dl-item urgent" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-r"></div><div><div class="dl-text">Submit Letter of Recommendation from <strong>Prof. Adrian</strong></div><div class="dl-date">Deadline: April 26, 2026 - Urgent - Click to mark done</div></div></div>
-              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Upload IELTS Score Report - ETH Zurich Portal</div><div class="dl-date">Due: May 10, 2026</div></div></div>
-              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-a"></div><div><div class="dl-text">Finalize Statement of Purpose for ETH Zurich</div><div class="dl-date">Due: May 15, 2026</div></div></div>
-              <div class="dl-item" onclick="toggleDeadlineDone(this)"><div class="dl-dot dd-g"></div><div><div class="dl-text">TU Munich decision expected</div><div class="dl-date">Expected: July 2026</div></div></div>
+              <div class="dl-item urgent"><div class="dl-dot dd-r"></div><div style="flex:1"><div class="dl-text">Submit Letter of Recommendation from <strong>Prof. Adrian</strong></div><div class="dl-date">Deadline: April 26, 2026 - Urgent</div></div><div class="toggle-sw" style="flex-shrink:0;margin-top:2px" onclick="toggleDeadlineDone(this)"></div></div>
+              <div class="dl-item"><div class="dl-dot dd-a"></div><div style="flex:1"><div class="dl-text">Upload IELTS Score Report - ETH Zurich Portal</div><div class="dl-date">Due: May 10, 2026</div></div><div class="toggle-sw" style="flex-shrink:0;margin-top:2px" onclick="toggleDeadlineDone(this)"></div></div>
+              <div class="dl-item"><div class="dl-dot dd-a"></div><div style="flex:1"><div class="dl-text">Finalize Statement of Purpose for ETH Zurich</div><div class="dl-date">Due: May 15, 2026</div></div><div class="toggle-sw" style="flex-shrink:0;margin-top:2px" onclick="toggleDeadlineDone(this)"></div></div>
+              <div class="dl-item"><div class="dl-dot dd-g"></div><div style="flex:1"><div class="dl-text">TU Munich decision expected</div><div class="dl-date">Expected: July 2026</div></div></div>
             </div>
           </div>
           <div class="gst">
@@ -1948,13 +1948,44 @@ function renderTracker(){
   }).join('');
   const ol=document.getElementById('ov-tracker-list'); if(ol)ol.innerHTML=html;
   const tc=document.getElementById('tracker-cards');
-  if(tc) tc.innerHTML=S.applications.map(a=>`<div class="tr-card">
-    <div class="tr-h"><div class="sbadge b-${a.badge}" style="flex-shrink:0">${a.badge.toUpperCase().slice(0,3)}</div>
-    <div style="flex:1"><div class="tsm fw7">${a.school} - ${a.prog}</div><div class="txs t2">Deadline: ${a.deadline}</div></div>
-    <span class="sp ${a.status==='Submitted'?'sp-g':a.progress>0?'sp-a':'sp-gr'}">${a.status}</span></div>
-    <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><div class="pb-bg" style="flex:1"><div class="pb ${a.status==='Submitted'?'pb-g':'pb-a'}" style="width:${a.progress}%"></div></div><span class="txs fw7">${a.progress}%</span></div>
-    <div class="tsm t2">${a.status==='Submitted'?'All documents submitted. Awaiting review.':a.progress===0?'Click "Add to Applications" to begin tracking.':'Application in progress.'}</div>
-  </div>`).join('');
+  if(tc) tc.innerHTML=S.applications.map(a=>{
+    const p = a.progress;
+    // Generate realistic document statuses
+    const docs = [
+      { name: 'Transcripts & Diploma', done: p >= 20 },
+      { name: 'Statement of Purpose', done: p >= 60 },
+      { name: 'CV / Resume', done: p >= 40 },
+      { name: 'Language Test (IELTS/TOEFL)', done: p >= 80 },
+      { name: 'Letters of Recommendation', done: p >= 100 }
+    ];
+    let docHtml = docs.map(d => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--br)">
+        <span style="display:flex;align-items:center;gap:6px">
+          <i data-lucide="${d.done ? 'check-circle-2' : 'circle'}" width="12" height="12" style="color:var(--${d.done ? 'green' : 'br2'})"></i>
+          ${d.name}
+        </span>
+        <span class="txs fw6" style="color:var(--${d.done ? 'green' : 'amber'})">${d.done ? 'Uploaded' : 'Missing'}</span>
+      </div>`).join('');
+
+    return `<div class="tr-card">
+      <div class="tr-h"><div class="sbadge b-${a.badge}" style="flex-shrink:0">${a.badge.toUpperCase().slice(0,3)}</div>
+      <div style="flex:1"><div class="tsm fw7">${a.school} - ${a.prog}</div><div class="txs t2">Deadline: ${a.deadline}</div></div>
+      <span class="sp ${a.status==='Submitted'?'sp-g':a.progress>0?'sp-a':'sp-gr'}">${a.status}</span></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:11px"><div class="pb-bg" style="flex:1"><div class="pb ${a.status==='Submitted'?'pb-g':'pb-a'}" style="width:${a.progress}%"></div></div><span class="txs fw7">${a.progress}%</span></div>
+
+      <details style="margin-top:14px;background:var(--sf);border:1px solid var(--br);border-radius:var(--r-sm);padding:8px 12px;cursor:pointer">
+        <summary style="font-size:12.5px;font-weight:600;color:var(--t1);outline:none;display:flex;align-items:center;list-style:none">
+           <i data-lucide="file-text" width="13" height="13" style="color:var(--accent);margin-right:6px"></i> 
+           Required Documents 
+           <span class="txs t3" style="margin-left:auto">${docs.filter(d=>d.done).length}/${docs.length} uploaded</span>
+        </summary>
+        <div style="margin-top:10px;font-size:12px;color:var(--t2)">
+           ${docHtml}
+           ${p < 100 ? `<div style="margin-top:10px;text-align:right"><button class="btn-sm btn-acc" onclick="triggerUpload()"><i data-lucide="upload" width="10" height="10"></i> Upload Missing</button></div>` : `<div style="margin-top:10px;text-align:right;color:var(--green);font-size:11px;font-weight:600"><i data-lucide="check" width="10" height="10"></i> Application package complete</div>`}
+        </div>
+      </details>
+    </div>`;
+  }).join('');
   lucide.createIcons();
   // ── Dynamic application count update ──
   const total = S.applications.length;
@@ -2021,7 +2052,12 @@ function viewDoc(name){
 }
 
 // ═══════════════════ DEADLINE TOGGLE ═══════════════════
-function toggleDeadlineDone(el){ el.classList.toggle('done-item'); if(el.classList.contains('done-item'))showToast('Task marked as complete','success'); }
+function toggleDeadlineDone(btn){ 
+  btn.classList.toggle('on'); 
+  const item = btn.closest('.dl-item');
+  if (item) item.classList.toggle('done-item'); 
+  if(btn.classList.contains('on')) showToast('Task marked as complete','success'); 
+}
 
 // ═══════════════════ EVALUATOR ═══════════════════
 function runEval(){
