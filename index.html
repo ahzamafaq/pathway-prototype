@@ -548,6 +548,7 @@ input,textarea,select{font-family:inherit}
       <div class="sdot here" id="sd1"></div>
       <div class="sdot" id="sd2"></div>
       <div class="sdot" id="sd3"></div>
+      <div class="sdot" id="sd4"></div>
     </div>
 
     <!-- Step 1 -->
@@ -567,7 +568,7 @@ input,textarea,select{font-family:inherit}
         <div class="tag-chip" onclick="toggleTag(this)">Software Systems</div>
       </div>
       <div class="ob-ft">
-        <span class="step-txt">Step 1 of 2</span>
+        <span class="step-txt">Step 1 of 3</span>
         <button class="btn-p" onclick="nextStep()">Continue <i data-lucide="arrow-right" width="14" height="14"></i></button>
       </div>
     </div>
@@ -584,8 +585,88 @@ input,textarea,select{font-family:inherit}
       </div>
       <div class="ob-ft">
         <button class="btn-g" onclick="prevStep()"><i data-lucide="arrow-left" width="13" height="13"></i> Back</button>
-        <span class="step-txt">Step 2 of 2</span>
-        <button class="btn-p" onclick="discover()">Discover My Path <i data-lucide="sparkles" width="13" height="13"></i></button>
+        <span class="step-txt">Step 2 of 3</span>
+        <button class="btn-p" onclick="nextStep2()">Continue <i data-lucide="arrow-right" width="14" height="14"></i></button>
+      </div>
+    </div>
+
+    <!-- Step 3: Academic Scores -->
+    <div id="obs3" style="display:none">
+      <div class="ob-q">What are your<br>academic scores?</div>
+      <div class="ob-sub">We'll use these to calculate your real admission chances at each university.</div>
+
+      <div style="display:flex;flex-direction:column;gap:18px;margin-bottom:32px">
+
+        <!-- GPA -->
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--t2);margin-bottom:8px">GPA (out of 20)</div>
+          <div style="display:flex;align-items:center;gap:12px">
+            <input type="range" id="gpa-slider" min="0" max="20" step="0.25" value="14"
+              oninput="document.getElementById('gpa-val').textContent=parseFloat(this.value).toFixed(2)+'/20'; updateGpaBar(this.value)"
+              style="flex:1;accent-color:var(--accent);cursor:pointer"/>
+            <span id="gpa-val" style="font-size:18px;font-weight:800;color:var(--accent);min-width:72px;text-align:right">14.00/20</span>
+          </div>
+          <div style="margin-top:6px">
+            <div style="height:4px;background:var(--sf3);border-radius:99px;overflow:hidden">
+              <div id="gpa-bar" style="height:100%;width:70%;background:linear-gradient(90deg,var(--ah),var(--accent));border-radius:99px;transition:width .3s"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px">
+              <span>0</span><span>10</span><span>15</span><span>20</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- English Test -->
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--t2);margin-bottom:8px">English Proficiency Test</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px" id="lang-test-tabs">
+            <button id="tab-ielts" class="ftab ac" onclick="switchLangTab('ielts')">IELTS</button>
+            <button id="tab-toefl" class="ftab" onclick="switchLangTab('toefl')">TOEFL iBT</button>
+            <button id="tab-none" class="ftab" onclick="switchLangTab('none')">Not taken yet</button>
+          </div>
+          <div id="lang-ielts-wrap">
+            <div style="display:flex;align-items:center;gap:12px">
+              <input type="range" id="ielts-slider" min="0" max="9" step="0.5" value="6.5"
+                oninput="document.getElementById('ielts-val').textContent=parseFloat(this.value).toFixed(1); updateIeltsBar(this.value)"
+                style="flex:1;accent-color:var(--accent);cursor:pointer"/>
+              <span id="ielts-val" style="font-size:18px;font-weight:800;color:var(--accent);min-width:40px;text-align:right">6.5</span>
+            </div>
+            <div style="margin-top:6px">
+              <div style="height:4px;background:var(--sf3);border-radius:99px;overflow:hidden">
+                <div id="ielts-bar" style="height:100%;width:72%;background:linear-gradient(90deg,var(--ah),var(--accent));border-radius:99px;transition:width .3s"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px">
+                <span>0</span><span>4.5</span><span>6.5</span><span>7.5</span><span>9</span>
+              </div>
+            </div>
+          </div>
+          <div id="lang-toefl-wrap" style="display:none">
+            <div style="display:flex;align-items:center;gap:12px">
+              <input type="range" id="toefl-slider" min="0" max="120" step="1" value="90"
+                oninput="document.getElementById('toefl-val').textContent=this.value+'/120'; updateToeflBar(this.value)"
+                style="flex:1;accent-color:var(--accent);cursor:pointer"/>
+              <span id="toefl-val" style="font-size:18px;font-weight:800;color:var(--accent);min-width:70px;text-align:right">90/120</span>
+            </div>
+            <div style="margin-top:6px">
+              <div style="height:4px;background:var(--sf3);border-radius:99px;overflow:hidden">
+                <div id="toefl-bar" style="height:100%;width:75%;background:linear-gradient(90deg,var(--ah),var(--accent));border-radius:99px;transition:width .3s"></div>
+              </div>
+              <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--t3);margin-top:4px">
+                <span>0</span><span>60</span><span>90</span><span>100</span><span>120</span>
+              </div>
+            </div>
+          </div>
+          <div id="lang-none-wrap" style="display:none;padding:12px;background:var(--ams);border:1px solid var(--amb);border-radius:var(--r-sm);font-size:12.5px;color:var(--amber)">
+            <i data-lucide="info" width="14" height="14" style="display:inline;margin-right:4px"></i>
+            No worries — we'll show you which universities you are academically eligible for and flag language requirements as pending.
+          </div>
+        </div>
+      </div>
+
+      <div class="ob-ft">
+        <button class="btn-g" onclick="prevStep2()"><i data-lucide="arrow-left" width="13" height="13"></i> Back</button>
+        <span class="step-txt">Step 3 of 3</span>
+        <button class="btn-p" onclick="discover()">Find My Matches <i data-lucide="sparkles" width="13" height="13"></i></button>
       </div>
     </div>
   </div>
@@ -597,7 +678,7 @@ input,textarea,select{font-family:inherit}
 <div class="screen" id="sc-matches">
   <div class="mc-wrap">
     <div class="mc-h">Your Matched Programs</div>
-    <div class="mc-sub">Sorted by compatibility with your interests and profile</div>
+    <div class="mc-sub" id="mc-sub">Sorted by your admission chances based on GPA &amp; language scores</div>
     <div class="mtags" id="mtags">
       <span class="mtag">Artificial Intelligence</span>
       <span class="mtag">Healthcare AI</span>
@@ -1657,9 +1738,129 @@ function prevStep(){
   document.getElementById('sd2').classList.remove('here'); document.getElementById('sd1').classList.remove('done');
   document.getElementById('sd1').classList.add('here');
 }
-function discover(){
+function nextStep2(){
+  document.getElementById('obs2').style.display='none';
+  const s3=document.getElementById('obs3'); s3.style.display='block'; s3.classList.add('fad');
   document.getElementById('sd2').classList.remove('here'); document.getElementById('sd2').classList.add('done');
   document.getElementById('sd3').classList.add('here');
+  lucide.createIcons();
+}
+function prevStep2(){
+  document.getElementById('obs3').style.display='none';
+  document.getElementById('obs2').style.display='block';
+  document.getElementById('sd3').classList.remove('here'); document.getElementById('sd2').classList.remove('done');
+  document.getElementById('sd2').classList.add('here');
+}
+function switchLangTab(tab){
+  ['ielts','toefl','none'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('ac',t===tab);
+    document.getElementById('lang-'+t+'-wrap').style.display=t===tab?'block':'none';
+  });
+  lucide.createIcons();
+}
+function updateGpaBar(v){
+  document.getElementById('gpa-bar').style.width=(v/20*100)+'%';
+}
+function updateIeltsBar(v){
+  document.getElementById('ielts-bar').style.width=(v/9*100)+'%';
+}
+function updateToeflBar(v){
+  document.getElementById('toefl-bar').style.width=(v/120*100)+'%';
+}
+
+// ─── University requirements data for match scoring ───
+const UNI_REQS = {
+  'mc-eth': { gpaMin: 15,   ieltsMin: 7.0,  toeflMin: 100, label: 'ETH Zurich' },
+  'mc-epl': { gpaMin: 15,   ieltsMin: 6.5,  toeflMin: 90,  label: 'EPFL' },
+  'mc-tum': { gpaMin: 14.5, ieltsMin: 6.5,  toeflMin: 88,  label: 'TU Munich' },
+  'mc-uva': { gpaMin: 14,   ieltsMin: 6.5,  toeflMin: 88,  label: 'Univ. of Amsterdam' },
+  'mc-kth': { gpaMin: 14,   ieltsMin: 6.5,  toeflMin: 88,  label: 'KTH Stockholm' },
+  'mc-imp': { gpaMin: 15.5, ieltsMin: 7.0,  toeflMin: 100, label: 'Imperial College' },
+  'mc-aal': { gpaMin: 13.5, ieltsMin: 6.5,  toeflMin: 88,  label: 'Aalto University' },
+  'mc-edi': { gpaMin: 14.5, ieltsMin: 7.0,  toeflMin: 100, label: 'Univ. of Edinburgh' },
+  'mc-ucl': { gpaMin: 14,   ieltsMin: 7.0,  toeflMin: 100, label: 'UCL' },
+  'mc-del': { gpaMin: 13,   ieltsMin: 6.0,  toeflMin: 80,  label: 'TU Delft' },
+  'mc-rw':  { gpaMin: 13,   ieltsMin: 6.0,  toeflMin: 80,  label: 'RWTH Aachen' },
+  'mc-cph': { gpaMin: 12,   ieltsMin: 6.0,  toeflMin: 80,  label: 'Copenhagen' }
+};
+
+function calcMatchScore(uniId, userGpa, userIelts, userToefl, langTab) {
+  const req = UNI_REQS[uniId];
+  if (!req) return 75;
+  // GPA score: 0-60 points
+  let gpaScore = 0;
+  if (userGpa >= req.gpaMin + 1.5) gpaScore = 60;
+  else if (userGpa >= req.gpaMin) gpaScore = 50;
+  else if (userGpa >= req.gpaMin - 0.5) gpaScore = 35;
+  else if (userGpa >= req.gpaMin - 1.5) gpaScore = 18;
+  else gpaScore = 5;
+  // Language score: 0-40 points
+  let langScore = 0;
+  if (langTab === 'none') {
+    langScore = 15; // no test taken, neutral
+  } else if (langTab === 'ielts') {
+    if (userIelts >= req.ieltsMin + 0.5) langScore = 40;
+    else if (userIelts >= req.ieltsMin) langScore = 33;
+    else if (userIelts >= req.ieltsMin - 0.5) langScore = 20;
+    else langScore = 4;
+  } else {
+    if (userToefl >= req.toeflMin + 10) langScore = 40;
+    else if (userToefl >= req.toeflMin) langScore = 33;
+    else if (userToefl >= req.toeflMin - 5) langScore = 20;
+    else langScore = 4;
+  }
+  return Math.min(99, gpaScore + langScore);
+}
+
+function getMatchLabel(score) {
+  if (score >= 85) return { cls: 'sp-g', text: score+'% match' };
+  if (score >= 70) return { cls: 'sp-ac', text: score+'% match' };
+  if (score >= 50) return { cls: 'sp-a', text: score+'% match' };
+  return { cls: 'sp-r', text: score+'% match' };
+}
+
+function discover(){
+  // Read GPA
+  const gpa = parseFloat(document.getElementById('gpa-slider').value);
+  S.userGpa = gpa;
+  // Read language
+  const langTab = document.querySelector('#lang-test-tabs .ftab.ac')?.id?.replace('tab-','') || 'ielts';
+  S.langTab = langTab;
+  S.userIelts = parseFloat(document.getElementById('ielts-slider').value);
+  S.userToefl = parseInt(document.getElementById('toefl-slider').value);
+
+  // Compute scores and update match badges
+  const scored = [];
+  document.querySelectorAll('.mc-card').forEach(card => {
+    const id = card.id;
+    const score = calcMatchScore(id, S.userGpa, S.userIelts, S.userToefl, S.langTab);
+    card.dataset.matchScore = score;
+    // Update the pill badge inside the card
+    const pill = card.querySelector('.mc-right .sp');
+    if (pill) {
+      const lbl = getMatchLabel(score);
+      pill.className = 'sp ' + lbl.cls;
+      pill.textContent = lbl.text;
+    }
+    scored.push(card);
+  });
+
+  // Re-sort cards by score descending
+  scored.sort((a,b) => parseInt(b.dataset.matchScore) - parseInt(a.dataset.matchScore));
+  const container = document.querySelector('#sc-matches .mc-wrap');
+  const anchor = document.getElementById('results-count');
+  scored.forEach(card => container.insertBefore(card, anchor.nextSibling));
+
+  // Update mtags with user profile
+  const tags = document.getElementById('mtags');
+  const selectedInterests = [...document.querySelectorAll('#interest-tags .tag-chip.sel')].map(t => t.textContent).slice(0,3);
+  const gpaTag = `GPA ${gpa.toFixed(2)}/20`;
+  const langTag = langTab==='ielts' ? `IELTS ${S.userIelts.toFixed(1)}` : langTab==='toefl' ? `TOEFL ${S.userToefl}` : 'Language test pending';
+  const degree = document.querySelector('.r-opt.sel .rlabel')?.textContent || 'Master's';
+  tags.innerHTML = [...selectedInterests, gpaTag, langTag, degree].map(t=>`<span class="mtag">${t}</span>`).join('');
+
+  document.getElementById('sd3').classList.remove('here'); document.getElementById('sd3').classList.add('done');
+  document.getElementById('sd4').classList.add('here');
   setTimeout(()=>goTo('matches'),100);
 }
 
