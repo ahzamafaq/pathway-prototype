@@ -1856,7 +1856,7 @@ function discover(){
   const selectedInterests = [...document.querySelectorAll('#interest-tags .tag-chip.sel')].map(t => t.textContent).slice(0,3);
   const gpaTag = `GPA ${gpa.toFixed(2)}/20`;
   const langTag = langTab==='ielts' ? `IELTS ${S.userIelts.toFixed(1)}` : langTab==='toefl' ? `TOEFL ${S.userToefl}` : 'Language test pending';
-  const degree = document.querySelector('.r-opt.sel .rlabel')?.textContent || 'Master's';
+  const degree = document.querySelector('.r-opt.sel .rlabel')?.textContent || "Master's";
   tags.innerHTML = [...selectedInterests, gpaTag, langTag, degree].map(t=>`<span class="mtag">${t}</span>`).join('');
 
   document.getElementById('sd3').classList.remove('here'); document.getElementById('sd3').classList.add('done');
