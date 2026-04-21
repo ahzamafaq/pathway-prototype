@@ -1845,11 +1845,10 @@ function discover(){
     scored.push(card);
   });
 
-  // Re-sort cards by score descending
+  // Re-sort cards by score descending — append in correct order after anchor
   scored.sort((a,b) => parseInt(b.dataset.matchScore) - parseInt(a.dataset.matchScore));
   const container = document.querySelector('#sc-matches .mc-wrap');
-  const anchor = document.getElementById('results-count');
-  scored.forEach(card => container.insertBefore(card, anchor.nextSibling));
+  scored.forEach(card => container.appendChild(card));
 
   // Update mtags with user profile
   const tags = document.getElementById('mtags');
